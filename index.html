@@ -9,7 +9,7 @@
 <link rel="icon" type="image/png" href="assets/favicon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
   :root{
     --attendo:       #1fd18a;
@@ -29,16 +29,26 @@
   *{ box-sizing: border-box; }
   html, body{
     margin: 0; padding: 0;
-    height: 100vh; width: 100vw;
-    overflow: hidden;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     font-feature-settings: 'ss01','cv11';
   }
-  body{ position: relative; background: #050810; }
+  html{ scroll-behavior: smooth; }
+  body{
+    background: #050810;
+    color: var(--text-light);
+    overflow-x: hidden;
+  }
 
-  /* HALVES */
-  .halves{ position: absolute; inset: 0; display: flex; z-index: 0; }
+  /* ──────────────────────────────────────────
+     FIXED STAGE LAYER — always covers viewport
+     ────────────────────────────────────────── */
+  .stage{
+    position: fixed; inset: 0;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .halves{ position: absolute; inset: 0; display: flex; }
   .half{ flex: 1; position: relative; overflow: hidden; }
   .half-att{
     background:
@@ -71,31 +81,35 @@
       transparent 0%, rgba(31,209,138,0.0) 5%,
       rgba(31,209,138,0.35) 30%, rgba(34,211,238,0.35) 70%,
       rgba(34,211,238,0.0) 95%, transparent 100%);
-    z-index: 2; transform: translateX(-50%);
+    transform: translateX(-50%);
   }
 
-  /* Animations — shared keyframes */
+  /* Shared animations */
   @keyframes fadeDropY{
-    from{ opacity: 0; transform: translateY(-8px); }
+    from{ opacity: 0; transform: translateY(-10px); }
     to{ opacity: 1; transform: translateY(0); }
   }
   @keyframes fadeDropXY{
-    from{ opacity: 0; transform: translate(-50%, -8px); }
+    from{ opacity: 0; transform: translate(-50%, -10px); }
+    to{ opacity: 1; transform: translate(-50%, 0); }
+  }
+  @keyframes fadeUpXY{
+    from{ opacity: 0; transform: translate(-50%, 10px); }
     to{ opacity: 1; transform: translate(-50%, 0); }
   }
   @keyframes fadeUp{
     from{ opacity: 0; transform: translateY(10px); }
     to{ opacity: 1; transform: translateY(0); }
   }
-  @keyframes fadeUpXY{
-    from{ opacity: 0; transform: translate(-50%, 10px); }
-    to{ opacity: 1; transform: translate(-50%, 0); }
+  @keyframes ping{
+    0%{ transform: scale(.5); opacity: .55; }
+    100%{ transform: scale(2.6); opacity: 0; }
   }
 
-  /* LIVE CHIP (top center) */
+  /* LIVE CHIP (top center, fixed) */
   .live-chip{
-    position: absolute;
-    top: 26px; left: 50%; transform: translate(-50%, -8px);
+    position: fixed;
+    top: 26px; left: 50%; transform: translate(-50%, -10px);
     z-index: 30;
     display: inline-flex; align-items: center; gap: 8px;
     padding: 6px 14px;
@@ -121,14 +135,10 @@
     border-radius: 50%; background: var(--attendo); opacity: .55;
     animation: ping 1.8s ease-out infinite;
   }
-  @keyframes ping{
-    0%{ transform: scale(.5); opacity: .55; }
-    100%{ transform: scale(2.6); opacity: 0; }
-  }
 
-  /* BRAND MARKS — CORNERS (elegant) */
+  /* BRAND MARKS — corners, fixed */
   .brand-mark{
-    position: absolute;
+    position: fixed;
     top: 32px;
     display: flex; align-items: center; gap: 16px;
     z-index: 12;
@@ -137,16 +147,15 @@
     animation: fadeDropY .7s cubic-bezier(.25,.8,.25,1) .25s forwards;
     padding: 8px 14px;
     border-radius: 12px;
-    background: rgba(255,255,255,0.55);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255,255,255,0.0);
-    transition: border-color .3s ease, background .3s ease;
+    border: 1px solid;
+    transition: background .3s ease;
   }
   .brand-mark.attendo{
     left: 28px;
-    border-color: rgba(31,209,138,0.22);
     background: rgba(255,255,255,0.72);
+    border-color: rgba(31,209,138,0.22);
     box-shadow: 0 10px 28px -14px rgba(31,209,138,0.35);
   }
   .brand-mark.hailo{
@@ -157,10 +166,7 @@
   }
   .brand-mark.attendo:hover{ background: rgba(255,255,255,0.85); }
   .brand-mark.hailo:hover{ background: rgba(10,18,40,0.85); }
-  .brand-mark img{
-    height: 36px; display: block;
-    transition: transform .3s ease;
-  }
+  .brand-mark img{ height: 36px; display: block; transition: transform .3s ease; }
   .brand-mark.attendo:hover img{ transform: scale(1.04); }
   .brand-mark .logo-text{
     font-weight: 800; letter-spacing: 0.24em;
@@ -189,7 +195,7 @@
   .connections{
     position: absolute; inset: 0;
     width: 100%; height: 100%;
-    z-index: 6; pointer-events: none;
+    pointer-events: none;
   }
   .conn-line{
     fill: none;
@@ -201,46 +207,60 @@
     stroke-dashoffset: 3000;
     opacity: 0;
     filter: url(#glow);
-    animation: drawLine 1.6s cubic-bezier(.4,0,.2,1) forwards;
+    transition: stroke-dashoffset 1.7s cubic-bezier(.4,0,.2,1), opacity .5s ease;
   }
   .conn-line.intra-att{ stroke: var(--attendo); stroke-width: 1.1; }
   .conn-line.intra-hai{ stroke: var(--hailo); stroke-width: 1.1; }
-  @keyframes drawLine{
-    0%{ stroke-dashoffset: 3000; opacity: 0; }
-    20%{ opacity: 0.8; }
-    100%{ stroke-dashoffset: 0; opacity: 0.55; }
+
+  /* Stage 3+: lines draw in */
+  body.s3 .conn-line,
+  body.s4 .conn-line{
+    opacity: 0.55;
+    stroke-dashoffset: 0;
   }
-  .conn-line.intra-att,
-  .conn-line.intra-hai{ animation-name: drawLineIntra; }
-  @keyframes drawLineIntra{
-    0%{ stroke-dashoffset: 3000; opacity: 0; }
-    20%{ opacity: 0.55; }
-    100%{ stroke-dashoffset: 0; opacity: 0.32; }
-  }
+  body.s3 .conn-line.intra-att,
+  body.s4 .conn-line.intra-att,
+  body.s3 .conn-line.intra-hai,
+  body.s4 .conn-line.intra-hai{ opacity: 0.32; }
 
   .packet{
     opacity: 0;
     filter: url(#glow-strong);
-    animation: pktFade .4s ease-out forwards;
-    animation-delay: 3s;
+    transition: opacity .8s ease;
   }
   .packet.green{ fill: var(--attendo); }
   .packet.cyan{ fill: var(--hailo); }
-  @keyframes pktFade{ to{ opacity: 1; } }
+  body.s3 .packet,
+  body.s4 .packet{ opacity: 1; }
 
   /* BUBBLES */
-  .bubbles{ position: absolute; inset: 0; z-index: 15; pointer-events: none; }
+  .bubbles{ position: absolute; inset: 0; pointer-events: none; }
   .bubble{
     position: absolute;
-    transform: translate(-50%, -50%) scale(.35);
+    transform: translate(-50%, -50%) scale(.4);
     opacity: 0;
     display: flex; flex-direction: column; align-items: center;
     pointer-events: auto;
-    animation: bubbleIn .55s cubic-bezier(.34,1.56,.64,1) forwards;
+    transition:
+      opacity .65s cubic-bezier(.34,1.56,.64,1),
+      transform .65s cubic-bezier(.34,1.56,.64,1);
   }
-  @keyframes bubbleIn{
-    to{ transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  /* Stage 1+ shows Attendo bubbles */
+  body.s1 .bubble.att,
+  body.s2 .bubble.att,
+  body.s3 .bubble.att,
+  body.s4 .bubble.att{
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
   }
+  /* Stage 2+ shows HAILO bubbles */
+  body.s2 .bubble.hai,
+  body.s3 .bubble.hai,
+  body.s4 .bubble.hai{
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
   .avatar{
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
@@ -256,13 +276,15 @@
     border-radius: 50%; border: 1px solid;
     opacity: 0;
     animation: ringPulse 3.2s ease-in-out infinite;
-    animation-delay: 2.5s;
   }
-  .bubble:hover .avatar{ transform: scale(1.08); }
+  body.s3 .avatar::after,
+  body.s4 .avatar::after{ animation-delay: 0s; opacity: 0; }
   @keyframes ringPulse{
     0%, 100%{ transform: scale(1); opacity: 0.28; }
     50%{ transform: scale(1.18); opacity: 0; }
   }
+  .bubble:hover .avatar{ transform: scale(1.08); }
+
   .bubble.att .avatar{
     width: 62px; height: 62px; font-size: 17px;
     background: #ffffff;
@@ -273,7 +295,6 @@
       0 1px 0 rgba(255,255,255,0.6) inset;
   }
   .bubble.att .avatar::after{ border-color: var(--attendo); }
-  .bubble.att:hover .avatar{ box-shadow: 0 10px 32px -6px rgba(31,209,138,0.55); }
   .bubble.hai .avatar{
     width: 46px; height: 46px; font-size: 13px;
     background: linear-gradient(135deg, #0a1228 0%, #0f1a35 100%);
@@ -284,7 +305,7 @@
       0 1px 0 rgba(255,255,255,0.04) inset;
   }
   .bubble.hai .avatar::after{ border-color: var(--hailo); }
-  .bubble.hai:hover .avatar{ box-shadow: 0 8px 26px -4px rgba(34,211,238,0.65); }
+
   .label{ margin-top: 8px; text-align: center; white-space: nowrap; }
   .bubble.att .label{ margin-top: 10px; }
   .label .name{ font-weight: 600; letter-spacing: -0.005em; }
@@ -298,49 +319,9 @@
   .bubble.hai .label .name{ font-size: 10.5px; color: var(--text-dark); }
   .bubble.hai .label .role{ font-size: 8.5px; color: var(--hailo); }
 
-  /* TAGLINE — bottom center */
-  .tagline{
-    position: absolute;
-    bottom: 26px; left: 50%; transform: translate(-50%, 10px);
-    z-index: 20;
-    display: inline-flex; align-items: center; gap: 12px;
-    padding: 12px 22px;
-    background: rgba(255,255,255,0.94);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(31,209,138,0.25);
-    border-radius: 999px;
-    font-family: 'Inter', sans-serif;
-    font-size: 13px;
-    color: var(--text-light);
-    box-shadow: 0 10px 36px -14px rgba(0,0,0,0.22);
-    opacity: 0;
-    animation: fadeUpXY .65s cubic-bezier(.25,.8,.25,1) 2.8s forwards;
-  }
-  .tagline .agent-dot{
-    width: 8px; height: 8px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--attendo), var(--hailo));
-    position: relative;
-  }
-  .tagline .agent-dot::after{
-    content:''; position: absolute; inset: -4px;
-    border-radius: 50%;
-    background: var(--hailo);
-    opacity: .35;
-    animation: ping 2s ease-out infinite;
-  }
-  .tagline .msg{ font-weight: 500; }
-  .tagline .msg em{
-    color: var(--attendo-dark); font-style: normal; font-weight: 700;
-    background: linear-gradient(135deg, var(--attendo-dark), var(--hailo-deep));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  /* COUNTER — bottom-left elegant income widget */
+  /* COUNTER — bottom-left, fixed, always visible */
   .counter{
-    position: absolute;
+    position: fixed;
     bottom: 26px; left: 28px;
     z-index: 21;
     padding: 14px 20px 12px;
@@ -353,7 +334,7 @@
     min-width: 220px;
     opacity: 0;
     transform: translateY(10px);
-    animation: fadeUp .65s cubic-bezier(.25,.8,.25,1) 3.0s forwards;
+    animation: fadeUp .65s cubic-bezier(.25,.8,.25,1) 1.0s forwards;
   }
   .counter-head{
     display: flex; align-items: center; gap: 8px;
@@ -376,14 +357,9 @@
   .counter-value{
     display: flex; align-items: baseline; gap: 4px;
     font-family: 'JetBrains Mono', monospace;
-    color: var(--text-light);
     line-height: 1;
   }
-  .counter-value .currency{
-    color: var(--attendo-dark);
-    font-weight: 600;
-    font-size: 18px;
-  }
+  .counter-value .currency{ color: var(--attendo-dark); font-weight: 600; font-size: 18px; }
   .counter-value .amount{
     font-weight: 700;
     font-size: 28px;
@@ -417,8 +393,7 @@
     width: 50px; height: 3px;
     background: rgba(31,209,138,0.15);
     border-radius: 2px;
-    position: relative;
-    overflow: hidden;
+    position: relative; overflow: hidden;
   }
   .counter-trail .bar-mini::after{
     content:'';
@@ -431,27 +406,206 @@
     from{ transform: translateX(-100%); }
     to{ transform: translateX(285%); }
   }
-  .counter-trail .live-mini{
+  .counter-trail .live-mini{ color: var(--attendo-dark); font-weight: 700; }
+
+  /* TAGLINE — bottom center, fixed, appears on stage 3+ */
+  .tagline{
+    position: fixed;
+    bottom: 26px; left: 50%; transform: translate(-50%, 10px);
+    z-index: 20;
+    display: inline-flex; align-items: center; gap: 12px;
+    padding: 12px 22px;
+    background: rgba(255,255,255,0.94);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(31,209,138,0.25);
+    border-radius: 999px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: var(--text-light);
+    box-shadow: 0 10px 36px -14px rgba(0,0,0,0.22);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .8s ease, transform .8s ease;
+  }
+  body.s3 .tagline, body.s4 .tagline{
+    opacity: 1;
+    transform: translate(-50%, 0);
+    pointer-events: auto;
+  }
+  .tagline .agent-dot{
+    width: 8px; height: 8px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--attendo), var(--hailo));
+    position: relative;
+  }
+  .tagline .agent-dot::after{
+    content:''; position: absolute; inset: -4px;
+    border-radius: 50%;
+    background: var(--hailo);
+    opacity: .35;
+    animation: ping 2s ease-out infinite;
+  }
+  .tagline .msg{ font-weight: 500; }
+  .tagline .msg em{
+    font-style: normal; font-weight: 700;
+    background: linear-gradient(135deg, var(--attendo-dark), var(--hailo-deep));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* ──────────────────────────────────────────
+     SCROLL SCENES (text overlays)
+     ────────────────────────────────────────── */
+  .scenes{ position: relative; z-index: 6; }
+  .scene{
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 0 28px;
+    position: relative;
+  }
+  .scene-content{
+    position: relative;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid;
+    border-radius: 18px;
+    padding: 28px 32px;
+    max-width: 440px;
+    box-shadow: 0 22px 60px -22px rgba(0,0,0,0.20);
+    opacity: 0;
+    transform: translateY(24px);
+    transition:
+      opacity .9s cubic-bezier(.25,.8,.25,1),
+      transform .9s cubic-bezier(.25,.8,.25,1);
+  }
+  .scene.in-view .scene-content{
+    opacity: 1; transform: translateY(0);
+  }
+
+  /* Scene 1 — left (over Attendo) */
+  .scene.s1 .scene-content{
+    margin-left: 7vw; margin-right: auto;
+    background: rgba(255,255,255,0.92);
+    border-color: rgba(31,209,138,0.30);
+    color: var(--text-light);
+  }
+  /* Scene 2 — right (over HAILO) */
+  .scene.s2 .scene-content{
+    margin-left: auto; margin-right: 7vw;
+    background: rgba(10,18,40,0.88);
+    border-color: rgba(34,211,238,0.32);
+    color: var(--text-dark);
+  }
+  .scene.s2 .scene-content h2{ color: var(--text-dark); }
+  .scene.s2 .scene-content .kicker{ color: var(--hailo-light); }
+  /* Scene 3 — centered */
+  .scene.s3 .scene-content{
+    margin: 0 auto;
+    text-align: center;
+    background: rgba(255,255,255,0.94);
+    border-color: rgba(31,209,138,0.30);
+  }
+
+  .scene-content .kicker{
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.20em;
+    text-transform: uppercase; font-weight: 700;
     color: var(--attendo-dark);
-    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .scene-content h2{
+    margin: 0 0 14px;
+    font-size: clamp(24px, 2.4vw, 32px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.12;
+  }
+  .scene-content p{
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: inherit;
+    opacity: .88;
+  }
+  .scene-content .pill-row{
+    display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px;
+  }
+  .scene-content .pill{
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.12em;
+    text-transform: uppercase; font-weight: 700;
+    background: rgba(31,209,138,0.12);
+    color: var(--attendo-dark);
+    border: 1px solid rgba(31,209,138,0.25);
+  }
+  .scene.s2 .scene-content .pill{
+    background: rgba(34,211,238,0.12);
+    color: var(--hailo-light);
+    border-color: rgba(34,211,238,0.30);
+  }
+  .scene.s3 .scene-content .pill{
+    background: linear-gradient(135deg, rgba(31,209,138,0.12), rgba(34,211,238,0.12));
+    border: 1px solid rgba(31,209,138,0.25);
+    color: var(--attendo-deep);
+  }
+
+  /* Scroll hint at end of scene 1 */
+  .scroll-hint{
+    position: absolute;
+    bottom: 8vh; left: 50%; transform: translateX(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(13,20,24,0.55);
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    pointer-events: none;
+    transition: opacity .5s ease;
+  }
+  body.s2 .scroll-hint, body.s3 .scroll-hint, body.s4 .scroll-hint{ opacity: 0; }
+  .scroll-hint .arrow{
+    width: 10px; height: 10px;
+    border-right: 2px solid var(--attendo);
+    border-bottom: 2px solid var(--attendo);
+    transform: rotate(45deg);
+    animation: bounceArrow 1.8s ease-in-out infinite;
+  }
+  @keyframes bounceArrow{
+    0%,100%{ transform: rotate(45deg) translate(0,0); opacity: 0.6; }
+    50%{ transform: rotate(45deg) translate(3px,3px); opacity: 1; }
+  }
+
+  /* Scroll progress bar (top of viewport, fixed) */
+  .scroll-prog{
+    position: fixed; top: 0; left: 0;
+    height: 2px; width: 0%;
+    background: linear-gradient(90deg, var(--attendo), var(--hailo));
+    box-shadow: 0 0 12px var(--attendo);
+    z-index: 100;
+    transition: width .12s linear;
   }
 
   /* MOBILE FALLBACK */
   @media (max-width: 1100px){
-    .bubbles, .connections, .divider, .brand-mark, .counter { display: none; }
+    .bubbles, .connections, .divider, .brand-mark, .counter, .tagline { display: none; }
     .halves{ flex-direction: column; }
-    .live-chip, .tagline{ font-size: 10px; padding: 7px 14px; }
-    .tagline{ max-width: 90vw; text-align: center; }
+    .scene-content{ max-width: 88vw; margin: 0 auto !important; }
+    .scene.s2 .scene-content{ background: rgba(10,18,40,0.88); color: var(--text-dark); }
     body::after{
-      content: 'Para ver la visualización completa, abrir en pantalla ≥ 1100px';
-      position: absolute; inset: 0;
-      display: flex; align-items: center; justify-content: center;
-      color: rgba(255,255,255,0.9);
-      font-size: 14px; text-align: center; padding: 0 24px;
-      z-index: 25;
+      content: 'Para la experiencia completa, abrir en pantalla ≥ 1100px';
+      position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%);
+      color: rgba(255,255,255,0.7);
+      font-size: 11px; padding: 6px 12px;
+      background: rgba(0,0,0,0.4); border-radius: 999px;
+      font-family: 'JetBrains Mono', monospace; letter-spacing: 0.12em;
+      z-index: 99;
     }
   }
-  @media (max-height: 800px) and (min-width: 1101px){
+  @media (max-height: 820px) and (min-width: 1101px){
     .bubble.att .avatar{ width: 54px; height: 54px; font-size: 15px; }
     .bubble.hai .avatar{ width: 40px; height: 40px; font-size: 11.5px; }
     .bubble.att .label .name{ font-size: 11px; }
@@ -460,8 +614,11 @@
     .bubble.hai .label .role{ font-size: 8px; }
     .brand-mark img{ height: 30px; }
     .brand-mark .logo-text{ font-size: 20px; }
-    .counter{ padding: 11px 16px 9px; min-width: 195px; }
+    .counter{ padding: 11px 16px 9px; min-width: 200px; }
     .counter-value .amount{ font-size: 24px; }
+    .scene-content{ padding: 22px 26px; max-width: 400px; }
+    .scene-content h2{ font-size: 24px; }
+    .scene-content p{ font-size: 14px; }
   }
 
   @media (prefers-reduced-motion: reduce){
@@ -472,24 +629,141 @@
     .packet{ opacity: 0.85; }
     .live-chip, .tagline{ opacity: 1; transform: translate(-50%, 0); }
     .brand-mark, .counter{ opacity: 1; transform: translateY(0); }
+    .scene-content{ opacity: 1; transform: translateY(0); }
   }
 </style>
 </head>
 <body>
 
-<div class="halves">
-  <div class="half half-att"></div>
-  <div class="half half-hai"></div>
+<!-- Scroll progress bar -->
+<div class="scroll-prog" id="scrollProg"></div>
+
+<!-- FIXED STAGE: halves, divider, SVG, bubbles -->
+<div class="stage">
+  <div class="halves">
+    <div class="half half-att"></div>
+    <div class="half half-hai"></div>
+  </div>
+  <div class="divider"></div>
+
+  <svg class="connections" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+    <defs>
+      <linearGradient id="grad-line" gradientUnits="userSpaceOnUse" x1="0" y1="50" x2="100" y2="50">
+        <stop offset="0%" stop-color="#1fd18a"/>
+        <stop offset="30%" stop-color="#5feab2"/>
+        <stop offset="50%" stop-color="#a5ecdf"/>
+        <stop offset="70%" stop-color="#67e8f9"/>
+        <stop offset="100%" stop-color="#22d3ee"/>
+      </linearGradient>
+      <filter id="glow" x="-100%" y="-100%" width="300%" height="300%">
+        <feGaussianBlur stdDeviation="0.35" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="glow-strong" x="-100%" y="-100%" width="300%" height="300%">
+        <feGaussianBlur stdDeviation="0.8" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+
+    <!-- CROSS-TEAM LINES (16) -->
+    <path id="c1"  class="conn-line" d="M 15 26 C 32 26, 44 22, 58 22"/>
+    <path id="c2"  class="conn-line" d="M 15 26 C 35 22, 55 20, 73 22"/>
+    <path id="c3"  class="conn-line" d="M 15 26 C 40 20, 65 18, 88 22"/>
+    <path id="c4"  class="conn-line" d="M 33 44 C 43 38, 50 28, 58 22"/>
+    <path id="c5"  class="conn-line" d="M 33 44 C 43 42, 50 38, 58 37"/>
+    <path id="c6"  class="conn-line" d="M 33 44 C 43 46, 50 50, 58 52"/>
+    <path id="c7"  class="conn-line" d="M 33 44 C 48 44, 62 35, 73 37"/>
+    <path id="c8"  class="conn-line" d="M 15 60 C 30 50, 45 42, 58 37"/>
+    <path id="c9"  class="conn-line" d="M 15 60 C 30 60, 45 65, 58 67"/>
+    <path id="c10" class="conn-line" d="M 15 60 C 35 60, 55 65, 73 67"/>
+    <path id="c11" class="conn-line" d="M 15 60 C 30 70, 45 78, 58 82"/>
+    <path id="c12" class="conn-line" d="M 33 76 C 40 64, 50 56, 58 52"/>
+    <path id="c13" class="conn-line" d="M 33 76 C 40 70, 50 67, 58 67"/>
+    <path id="c14" class="conn-line" d="M 33 76 C 40 78, 50 81, 58 82"/>
+    <path id="c15" class="conn-line" d="M 33 76 C 50 80, 65 82, 73 82"/>
+    <path id="c16" class="conn-line" d="M 33 76 C 55 80, 75 84, 88 82"/>
+
+    <!-- INTRA-HAILO LINES (8) -->
+    <path id="h1" class="conn-line intra-hai" d="M 58 22 C 63 20, 68 20, 73 22"/>
+    <path id="h2" class="conn-line intra-hai" d="M 73 22 C 78 20, 83 20, 88 22"/>
+    <path id="h3" class="conn-line intra-hai" d="M 58 37 C 65 33, 80 33, 88 37"/>
+    <path id="h4" class="conn-line intra-hai" d="M 58 52 C 65 48, 80 48, 88 52"/>
+    <path id="h5" class="conn-line intra-hai" d="M 73 67 C 78 65, 83 65, 88 67"/>
+    <path id="h6" class="conn-line intra-hai" d="M 73 82 C 78 80, 83 80, 88 82"/>
+    <path id="h7" class="conn-line intra-hai" d="M 58 22 C 56 27, 56 32, 58 37"/>
+    <path id="h8" class="conn-line intra-hai" d="M 58 52 C 56 57, 56 62, 58 67"/>
+
+    <!-- INTRA-ATTENDO (2) -->
+    <path id="a1" class="conn-line intra-att" d="M 15 26 C 20 30, 28 38, 33 44"/>
+    <path id="a2" class="conn-line intra-att" d="M 15 60 C 20 65, 28 72, 33 76"/>
+
+    <!-- PACKETS bidirectional -->
+    <circle class="packet green" r="0.7"><animateMotion dur="3.6s" repeatCount="indefinite"><mpath href="#c1"/></animateMotion></circle>
+    <circle class="packet cyan"  r="0.7"><animateMotion dur="3.6s" repeatCount="indefinite" begin="1.8s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c1"/></animateMotion></circle>
+    <circle class="packet cyan"  r="0.7"><animateMotion dur="3.4s" repeatCount="indefinite" begin="0.2s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c2"/></animateMotion></circle>
+    <circle class="packet green" r="0.7"><animateMotion dur="3.8s" repeatCount="indefinite" begin="0.4s"><mpath href="#c3"/></animateMotion></circle>
+    <circle class="packet cyan"  r="0.7"><animateMotion dur="3.8s" repeatCount="indefinite" begin="2.3s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c3"/></animateMotion></circle>
+    <circle class="packet green" r="0.7"><animateMotion dur="3.2s" repeatCount="indefinite" begin="0.6s"><mpath href="#c4"/></animateMotion></circle>
+    <circle class="packet green" r="0.7"><animateMotion dur="3.0s" repeatCount="indefinite" begin="0.8s"><mpath href="#c5"/></animateMotion></circle>
+    <circle class="packet cyan"  r="0.7"><animateMotion dur="3.0s" repeatCount="indefinite" begin="2.3s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c5"/></animateMotion></circle>
+    <circle class="packet cyan"  r="0.7"><animateMotion dur="3.2s" repeatCount="indefinite" begin="1.0s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c6"/></animateMotion></circle>
+    <circle class="packet green" r="0.7"><animateMotion dur="3.6s" repeatCount="indefinite" begin="1.2s"><mpath href="#c7"/></animateMotion></circle>
+    <circle class="packet green" r="0.7"><animateMotion dur="3.8s" repeatCount="indefinite" begin="1.4s"><mpath href="#c8"/></animateMotion></circle>
+    <circle class="packet cyan"  r="0.7"><animateMotion dur="3.8s" repeatCount="indefinite" begin="3.3s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c8"/></animateMotion></circle>
+    <circle class="packet green" r="0.7"><animateMotion dur="3.4s" repeatCount="indefinite" begin="1.5s"><mpath href="#c9"/></animateMotion></circle>
+    <circle class="packet cyan"  r="0.7"><animateMotion dur="3.8s" repeatCount="indefinite" begin="1.7s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c10"/></animateMotion></circle>
+    <circle class="packet green" r="0.7"><animateMotion dur="3.6s" repeatCount="indefinite" begin="1.9s"><mpath href="#c11"/></animateMotion></circle>
+    <circle class="packet cyan"  r="0.7"><animateMotion dur="3.6s" repeatCount="indefinite" begin="3.7s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c11"/></animateMotion></circle>
+    <circle class="packet green" r="0.7"><animateMotion dur="3.4s" repeatCount="indefinite" begin="2.0s"><mpath href="#c12"/></animateMotion></circle>
+    <circle class="packet cyan"  r="0.7"><animateMotion dur="3.2s" repeatCount="indefinite" begin="2.2s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c13"/></animateMotion></circle>
+    <circle class="packet green" r="0.7"><animateMotion dur="3.0s" repeatCount="indefinite" begin="2.4s"><mpath href="#c14"/></animateMotion></circle>
+    <circle class="packet cyan"  r="0.7"><animateMotion dur="3.4s" repeatCount="indefinite" begin="2.6s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c15"/></animateMotion></circle>
+    <circle class="packet green" r="0.7"><animateMotion dur="3.8s" repeatCount="indefinite" begin="2.8s"><mpath href="#c16"/></animateMotion></circle>
+    <circle class="packet cyan"  r="0.7"><animateMotion dur="3.8s" repeatCount="indefinite" begin="4.7s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c16"/></animateMotion></circle>
+
+    <circle class="packet cyan" r="0.5"><animateMotion dur="2.8s" repeatCount="indefinite" begin="2.0s"><mpath href="#h1"/></animateMotion></circle>
+    <circle class="packet cyan" r="0.5"><animateMotion dur="2.8s" repeatCount="indefinite" begin="2.4s"><mpath href="#h2"/></animateMotion></circle>
+    <circle class="packet cyan" r="0.5"><animateMotion dur="3.0s" repeatCount="indefinite" begin="2.6s"><mpath href="#h3"/></animateMotion></circle>
+    <circle class="packet cyan" r="0.5"><animateMotion dur="3.0s" repeatCount="indefinite" begin="2.8s"><mpath href="#h4"/></animateMotion></circle>
+    <circle class="packet cyan" r="0.5"><animateMotion dur="2.6s" repeatCount="indefinite" begin="3.0s"><mpath href="#h5"/></animateMotion></circle>
+    <circle class="packet cyan" r="0.5"><animateMotion dur="2.6s" repeatCount="indefinite" begin="3.2s"><mpath href="#h6"/></animateMotion></circle>
+    <circle class="packet cyan" r="0.5"><animateMotion dur="2.8s" repeatCount="indefinite" begin="2.2s"><mpath href="#h7"/></animateMotion></circle>
+    <circle class="packet cyan" r="0.5"><animateMotion dur="2.8s" repeatCount="indefinite" begin="2.6s"><mpath href="#h8"/></animateMotion></circle>
+    <circle class="packet green" r="0.5"><animateMotion dur="2.8s" repeatCount="indefinite" begin="2.5s"><mpath href="#a1"/></animateMotion></circle>
+    <circle class="packet green" r="0.5"><animateMotion dur="2.8s" repeatCount="indefinite" begin="2.9s"><mpath href="#a2"/></animateMotion></circle>
+  </svg>
+
+  <!-- BUBBLES -->
+  <div class="bubbles">
+    <div class="bubble att" style="left:15%; top:26%; transition-delay: 0.05s;"><div class="avatar"><span>AC</span></div><div class="label"><div class="name">Andrés Cueva</div><div class="role">CEO · Co-founder</div></div></div>
+    <div class="bubble att" style="left:33%; top:44%; transition-delay: 0.15s;"><div class="avatar"><span>AV</span></div><div class="label"><div class="name">Alejandro Vidrio</div><div class="role">CFO</div></div></div>
+    <div class="bubble att" style="left:15%; top:60%; transition-delay: 0.25s;"><div class="avatar"><span>JT</span></div><div class="label"><div class="name">Jesús Treviño</div><div class="role">Operaciones · Riesgo</div></div></div>
+    <div class="bubble att" style="left:33%; top:76%; transition-delay: 0.35s;"><div class="avatar"><span>JF</span></div><div class="label"><div class="name">Jaime Flores</div><div class="role">DG · Vive Préstamo</div></div></div>
+
+    <div class="bubble hai" style="left:58%; top:22%; transition-delay: 0.00s;"><div class="avatar"><span>GE</span></div><div class="label"><div class="name">Gonzalo Estrada</div><div class="role">Founder</div></div></div>
+    <div class="bubble hai" style="left:73%; top:22%; transition-delay: 0.06s;"><div class="avatar"><span>SH</span></div><div class="label"><div class="name">Erik “Shadow”</div><div class="role">Co-founder</div></div></div>
+    <div class="bubble hai" style="left:88%; top:22%; transition-delay: 0.12s;"><div class="avatar"><span>DR</span></div><div class="label"><div class="name">Diana Ríos</div><div class="role">Estrategia IA</div></div></div>
+    <div class="bubble hai" style="left:58%; top:37%; transition-delay: 0.18s;"><div class="avatar"><span>LM</span></div><div class="label"><div class="name">Lucas Mendoza</div><div class="role">Engineering Lead</div></div></div>
+    <div class="bubble hai" style="left:73%; top:37%; transition-delay: 0.24s;"><div class="avatar"><span>SC</span></div><div class="label"><div class="name">Sofía Castro</div><div class="role">Producto</div></div></div>
+    <div class="bubble hai" style="left:88%; top:37%; transition-delay: 0.30s;"><div class="avatar"><span>MV</span></div><div class="label"><div class="name">Mateo Vega</div><div class="role">Operaciones</div></div></div>
+    <div class="bubble hai" style="left:58%; top:52%; transition-delay: 0.36s;"><div class="avatar"><span>PN</span></div><div class="label"><div class="name">Paola Núñez</div><div class="role">Data Science</div></div></div>
+    <div class="bubble hai" style="left:73%; top:52%; transition-delay: 0.42s;"><div class="avatar"><span>IR</span></div><div class="label"><div class="name">Iván Rojas</div><div class="role">AI Research</div></div></div>
+    <div class="bubble hai" style="left:88%; top:52%; transition-delay: 0.48s;"><div class="avatar"><span>CS</span></div><div class="label"><div class="name">Camila Soto</div><div class="role">UX Research</div></div></div>
+    <div class="bubble hai" style="left:58%; top:67%; transition-delay: 0.54s;"><div class="avatar"><span>BL</span></div><div class="label"><div class="name">Bruno Lara</div><div class="role">Backend</div></div></div>
+    <div class="bubble hai" style="left:73%; top:67%; transition-delay: 0.60s;"><div class="avatar"><span>RC</span></div><div class="label"><div class="name">Renata Cano</div><div class="role">Frontend</div></div></div>
+    <div class="bubble hai" style="left:88%; top:67%; transition-delay: 0.66s;"><div class="avatar"><span>HS</span></div><div class="label"><div class="name">Hugo Salas</div><div class="role">DevOps</div></div></div>
+    <div class="bubble hai" style="left:58%; top:82%; transition-delay: 0.72s;"><div class="avatar"><span>VC</span></div><div class="label"><div class="name">Valeria Cruz</div><div class="role">Project Mgmt</div></div></div>
+    <div class="bubble hai" style="left:73%; top:82%; transition-delay: 0.78s;"><div class="avatar"><span>DO</span></div><div class="label"><div class="name">Diego Ortiz</div><div class="role">Sales</div></div></div>
+    <div class="bubble hai" style="left:88%; top:82%; transition-delay: 0.84s;"><div class="avatar"><span>AP</span></div><div class="label"><div class="name">Andrea Peña</div><div class="role">Marketing</div></div></div>
+  </div>
 </div>
 
-<div class="divider"></div>
-
+<!-- FIXED UI -->
 <div class="live-chip">
   <span class="live-dot"></span>
   Live · Comunicación activa
 </div>
 
-<!-- BRAND MARKS — corners -->
 <div class="brand-mark attendo">
   <img src="assets/attendo-logo.png" alt="Attendo" />
   <span class="role-text">Financiera</span>
@@ -499,119 +773,6 @@
   <span class="logo-text">HAILO</span>
 </div>
 
-<svg class="connections" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-  <defs>
-    <linearGradient id="grad-line" gradientUnits="userSpaceOnUse" x1="0" y1="50" x2="100" y2="50">
-      <stop offset="0%" stop-color="#1fd18a"/>
-      <stop offset="30%" stop-color="#5feab2"/>
-      <stop offset="50%" stop-color="#a5ecdf"/>
-      <stop offset="70%" stop-color="#67e8f9"/>
-      <stop offset="100%" stop-color="#22d3ee"/>
-    </linearGradient>
-    <filter id="glow" x="-100%" y="-100%" width="300%" height="300%">
-      <feGaussianBlur stdDeviation="0.35" result="blur"/>
-      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-    <filter id="glow-strong" x="-100%" y="-100%" width="300%" height="300%">
-      <feGaussianBlur stdDeviation="0.8" result="blur"/>
-      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-  </defs>
-
-  <!-- CROSS-TEAM LINES (16) -->
-  <path id="c1"  class="conn-line" style="animation-delay:1.20s" d="M 15 26 C 32 26, 44 22, 58 22"/>
-  <path id="c2"  class="conn-line" style="animation-delay:1.27s" d="M 15 26 C 35 22, 55 20, 73 22"/>
-  <path id="c3"  class="conn-line" style="animation-delay:1.34s" d="M 15 26 C 40 20, 65 18, 88 22"/>
-  <path id="c4"  class="conn-line" style="animation-delay:1.41s" d="M 33 44 C 43 38, 50 28, 58 22"/>
-  <path id="c5"  class="conn-line" style="animation-delay:1.48s" d="M 33 44 C 43 42, 50 38, 58 37"/>
-  <path id="c6"  class="conn-line" style="animation-delay:1.55s" d="M 33 44 C 43 46, 50 50, 58 52"/>
-  <path id="c7"  class="conn-line" style="animation-delay:1.62s" d="M 33 44 C 48 44, 62 35, 73 37"/>
-  <path id="c8"  class="conn-line" style="animation-delay:1.69s" d="M 15 60 C 30 50, 45 42, 58 37"/>
-  <path id="c9"  class="conn-line" style="animation-delay:1.76s" d="M 15 60 C 30 60, 45 65, 58 67"/>
-  <path id="c10" class="conn-line" style="animation-delay:1.83s" d="M 15 60 C 35 60, 55 65, 73 67"/>
-  <path id="c11" class="conn-line" style="animation-delay:1.90s" d="M 15 60 C 30 70, 45 78, 58 82"/>
-  <path id="c12" class="conn-line" style="animation-delay:1.97s" d="M 33 76 C 40 64, 50 56, 58 52"/>
-  <path id="c13" class="conn-line" style="animation-delay:2.04s" d="M 33 76 C 40 70, 50 67, 58 67"/>
-  <path id="c14" class="conn-line" style="animation-delay:2.11s" d="M 33 76 C 40 78, 50 81, 58 82"/>
-  <path id="c15" class="conn-line" style="animation-delay:2.18s" d="M 33 76 C 50 80, 65 82, 73 82"/>
-  <path id="c16" class="conn-line" style="animation-delay:2.25s" d="M 33 76 C 55 80, 75 84, 88 82"/>
-
-  <!-- INTRA-HAILO LINES (8) -->
-  <path id="h1" class="conn-line intra-hai" style="animation-delay:2.32s" d="M 58 22 C 63 20, 68 20, 73 22"/>
-  <path id="h2" class="conn-line intra-hai" style="animation-delay:2.36s" d="M 73 22 C 78 20, 83 20, 88 22"/>
-  <path id="h3" class="conn-line intra-hai" style="animation-delay:2.40s" d="M 58 37 C 65 33, 80 33, 88 37"/>
-  <path id="h4" class="conn-line intra-hai" style="animation-delay:2.44s" d="M 58 52 C 65 48, 80 48, 88 52"/>
-  <path id="h5" class="conn-line intra-hai" style="animation-delay:2.48s" d="M 73 67 C 78 65, 83 65, 88 67"/>
-  <path id="h6" class="conn-line intra-hai" style="animation-delay:2.52s" d="M 73 82 C 78 80, 83 80, 88 82"/>
-  <path id="h7" class="conn-line intra-hai" style="animation-delay:2.56s" d="M 58 22 C 56 27, 56 32, 58 37"/>
-  <path id="h8" class="conn-line intra-hai" style="animation-delay:2.60s" d="M 58 52 C 56 57, 56 62, 58 67"/>
-
-  <!-- INTRA-ATTENDO LINES (2) -->
-  <path id="a1" class="conn-line intra-att" style="animation-delay:2.64s" d="M 15 26 C 20 30, 28 38, 33 44"/>
-  <path id="a2" class="conn-line intra-att" style="animation-delay:2.68s" d="M 15 60 C 20 65, 28 72, 33 76"/>
-
-  <!-- PACKETS bidirectional -->
-  <circle class="packet green" r="0.7"><animateMotion dur="3.6s" repeatCount="indefinite" begin="3.0s"><mpath href="#c1"/></animateMotion></circle>
-  <circle class="packet cyan"  r="0.7"><animateMotion dur="3.6s" repeatCount="indefinite" begin="4.8s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c1"/></animateMotion></circle>
-  <circle class="packet cyan"  r="0.7"><animateMotion dur="3.4s" repeatCount="indefinite" begin="3.2s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c2"/></animateMotion></circle>
-  <circle class="packet green" r="0.7"><animateMotion dur="3.8s" repeatCount="indefinite" begin="3.4s"><mpath href="#c3"/></animateMotion></circle>
-  <circle class="packet cyan"  r="0.7"><animateMotion dur="3.8s" repeatCount="indefinite" begin="5.3s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c3"/></animateMotion></circle>
-  <circle class="packet green" r="0.7"><animateMotion dur="3.2s" repeatCount="indefinite" begin="3.6s"><mpath href="#c4"/></animateMotion></circle>
-  <circle class="packet green" r="0.7"><animateMotion dur="3.0s" repeatCount="indefinite" begin="3.8s"><mpath href="#c5"/></animateMotion></circle>
-  <circle class="packet cyan"  r="0.7"><animateMotion dur="3.0s" repeatCount="indefinite" begin="5.3s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c5"/></animateMotion></circle>
-  <circle class="packet cyan"  r="0.7"><animateMotion dur="3.2s" repeatCount="indefinite" begin="4.0s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c6"/></animateMotion></circle>
-  <circle class="packet green" r="0.7"><animateMotion dur="3.6s" repeatCount="indefinite" begin="4.2s"><mpath href="#c7"/></animateMotion></circle>
-  <circle class="packet green" r="0.7"><animateMotion dur="3.8s" repeatCount="indefinite" begin="4.4s"><mpath href="#c8"/></animateMotion></circle>
-  <circle class="packet cyan"  r="0.7"><animateMotion dur="3.8s" repeatCount="indefinite" begin="6.3s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c8"/></animateMotion></circle>
-  <circle class="packet green" r="0.7"><animateMotion dur="3.4s" repeatCount="indefinite" begin="4.5s"><mpath href="#c9"/></animateMotion></circle>
-  <circle class="packet cyan"  r="0.7"><animateMotion dur="3.8s" repeatCount="indefinite" begin="4.7s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c10"/></animateMotion></circle>
-  <circle class="packet green" r="0.7"><animateMotion dur="3.6s" repeatCount="indefinite" begin="4.9s"><mpath href="#c11"/></animateMotion></circle>
-  <circle class="packet cyan"  r="0.7"><animateMotion dur="3.6s" repeatCount="indefinite" begin="6.7s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c11"/></animateMotion></circle>
-  <circle class="packet green" r="0.7"><animateMotion dur="3.4s" repeatCount="indefinite" begin="5.0s"><mpath href="#c12"/></animateMotion></circle>
-  <circle class="packet cyan"  r="0.7"><animateMotion dur="3.2s" repeatCount="indefinite" begin="5.2s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c13"/></animateMotion></circle>
-  <circle class="packet green" r="0.7"><animateMotion dur="3.0s" repeatCount="indefinite" begin="5.4s"><mpath href="#c14"/></animateMotion></circle>
-  <circle class="packet cyan"  r="0.7"><animateMotion dur="3.4s" repeatCount="indefinite" begin="5.6s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c15"/></animateMotion></circle>
-  <circle class="packet green" r="0.7"><animateMotion dur="3.8s" repeatCount="indefinite" begin="5.8s"><mpath href="#c16"/></animateMotion></circle>
-  <circle class="packet cyan"  r="0.7"><animateMotion dur="3.8s" repeatCount="indefinite" begin="7.7s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c16"/></animateMotion></circle>
-
-  <!-- Intra packets -->
-  <circle class="packet cyan" r="0.5"><animateMotion dur="2.8s" repeatCount="indefinite" begin="5.0s"><mpath href="#h1"/></animateMotion></circle>
-  <circle class="packet cyan" r="0.5"><animateMotion dur="2.8s" repeatCount="indefinite" begin="5.4s"><mpath href="#h2"/></animateMotion></circle>
-  <circle class="packet cyan" r="0.5"><animateMotion dur="3.0s" repeatCount="indefinite" begin="5.6s"><mpath href="#h3"/></animateMotion></circle>
-  <circle class="packet cyan" r="0.5"><animateMotion dur="3.0s" repeatCount="indefinite" begin="5.8s"><mpath href="#h4"/></animateMotion></circle>
-  <circle class="packet cyan" r="0.5"><animateMotion dur="2.6s" repeatCount="indefinite" begin="6.0s"><mpath href="#h5"/></animateMotion></circle>
-  <circle class="packet cyan" r="0.5"><animateMotion dur="2.6s" repeatCount="indefinite" begin="6.2s"><mpath href="#h6"/></animateMotion></circle>
-  <circle class="packet cyan" r="0.5"><animateMotion dur="2.8s" repeatCount="indefinite" begin="5.2s"><mpath href="#h7"/></animateMotion></circle>
-  <circle class="packet cyan" r="0.5"><animateMotion dur="2.8s" repeatCount="indefinite" begin="5.6s"><mpath href="#h8"/></animateMotion></circle>
-  <circle class="packet green" r="0.5"><animateMotion dur="2.8s" repeatCount="indefinite" begin="5.5s"><mpath href="#a1"/></animateMotion></circle>
-  <circle class="packet green" r="0.5"><animateMotion dur="2.8s" repeatCount="indefinite" begin="5.9s"><mpath href="#a2"/></animateMotion></circle>
-</svg>
-
-<!-- Team bubbles -->
-<div class="bubbles">
-  <div class="bubble att" style="left:15%; top:26%; animation-delay:0.40s;"><div class="avatar"><span>AC</span></div><div class="label"><div class="name">Andrés Cueva</div><div class="role">CEO · Co-founder</div></div></div>
-  <div class="bubble att" style="left:33%; top:44%; animation-delay:0.50s;"><div class="avatar"><span>AV</span></div><div class="label"><div class="name">Alejandro Vidrio</div><div class="role">CFO</div></div></div>
-  <div class="bubble att" style="left:15%; top:60%; animation-delay:0.60s;"><div class="avatar"><span>JT</span></div><div class="label"><div class="name">Jesús Treviño</div><div class="role">Operaciones · Riesgo</div></div></div>
-  <div class="bubble att" style="left:33%; top:76%; animation-delay:0.70s;"><div class="avatar"><span>JF</span></div><div class="label"><div class="name">Jaime Flores</div><div class="role">DG · Vive Préstamo</div></div></div>
-
-  <div class="bubble hai" style="left:58%; top:22%; animation-delay:0.80s;"><div class="avatar"><span>GE</span></div><div class="label"><div class="name">Gonzalo Estrada</div><div class="role">Founder</div></div></div>
-  <div class="bubble hai" style="left:73%; top:22%; animation-delay:0.86s;"><div class="avatar"><span>SH</span></div><div class="label"><div class="name">Erik “Shadow”</div><div class="role">Co-founder</div></div></div>
-  <div class="bubble hai" style="left:88%; top:22%; animation-delay:0.92s;"><div class="avatar"><span>DR</span></div><div class="label"><div class="name">Diana Ríos</div><div class="role">Estrategia IA</div></div></div>
-  <div class="bubble hai" style="left:58%; top:37%; animation-delay:0.98s;"><div class="avatar"><span>LM</span></div><div class="label"><div class="name">Lucas Mendoza</div><div class="role">Engineering Lead</div></div></div>
-  <div class="bubble hai" style="left:73%; top:37%; animation-delay:1.04s;"><div class="avatar"><span>SC</span></div><div class="label"><div class="name">Sofía Castro</div><div class="role">Producto</div></div></div>
-  <div class="bubble hai" style="left:88%; top:37%; animation-delay:1.10s;"><div class="avatar"><span>MV</span></div><div class="label"><div class="name">Mateo Vega</div><div class="role">Operaciones</div></div></div>
-  <div class="bubble hai" style="left:58%; top:52%; animation-delay:1.16s;"><div class="avatar"><span>PN</span></div><div class="label"><div class="name">Paola Núñez</div><div class="role">Data Science</div></div></div>
-  <div class="bubble hai" style="left:73%; top:52%; animation-delay:1.22s;"><div class="avatar"><span>IR</span></div><div class="label"><div class="name">Iván Rojas</div><div class="role">AI Research</div></div></div>
-  <div class="bubble hai" style="left:88%; top:52%; animation-delay:1.28s;"><div class="avatar"><span>CS</span></div><div class="label"><div class="name">Camila Soto</div><div class="role">UX Research</div></div></div>
-  <div class="bubble hai" style="left:58%; top:67%; animation-delay:1.34s;"><div class="avatar"><span>BL</span></div><div class="label"><div class="name">Bruno Lara</div><div class="role">Backend</div></div></div>
-  <div class="bubble hai" style="left:73%; top:67%; animation-delay:1.40s;"><div class="avatar"><span>RC</span></div><div class="label"><div class="name">Renata Cano</div><div class="role">Frontend</div></div></div>
-  <div class="bubble hai" style="left:88%; top:67%; animation-delay:1.46s;"><div class="avatar"><span>HS</span></div><div class="label"><div class="name">Hugo Salas</div><div class="role">DevOps</div></div></div>
-  <div class="bubble hai" style="left:58%; top:82%; animation-delay:1.52s;"><div class="avatar"><span>VC</span></div><div class="label"><div class="name">Valeria Cruz</div><div class="role">Project Mgmt</div></div></div>
-  <div class="bubble hai" style="left:73%; top:82%; animation-delay:1.58s;"><div class="avatar"><span>DO</span></div><div class="label"><div class="name">Diego Ortiz</div><div class="role">Sales</div></div></div>
-  <div class="bubble hai" style="left:88%; top:82%; animation-delay:1.64s;"><div class="avatar"><span>AP</span></div><div class="label"><div class="name">Andrea Peña</div><div class="role">Marketing</div></div></div>
-</div>
-
-<!-- COUNTER — bottom left -->
 <div class="counter" aria-live="polite">
   <div class="counter-head">
     <span class="up">↗</span>
@@ -628,38 +789,114 @@
   </div>
 </div>
 
-<!-- TAGLINE — bottom center -->
 <div class="tagline">
   <span class="agent-dot"></span>
   <span class="msg">Comunicación directa entre <em>agentes inteligentes</em></span>
 </div>
 
+<!-- SCROLL SCENES -->
+<main class="scenes">
+
+  <section class="scene s1" data-stage="1">
+    <div class="scene-content">
+      <span class="kicker">01 · MAPEAMOS</span>
+      <h2>Empezamos por escuchar a Attendo.</h2>
+      <p>Antes de proponer una sola línea de código, mapeamos cada área. Quién decide, quién opera, dónde se generan los datos, por dónde fluye el dinero y el riesgo. Cada área de Attendo tiene su propio ritmo — lo aprendemos primero.</p>
+      <div class="pill-row">
+        <span class="pill">Crédito</span>
+        <span class="pill">Riesgo</span>
+        <span class="pill">Cobranza</span>
+        <span class="pill">Operaciones</span>
+      </div>
+    </div>
+    <div class="scroll-hint">
+      <span>Desliza para continuar</span>
+      <span class="arrow"></span>
+    </div>
+  </section>
+
+  <section class="scene s2" data-stage="2">
+    <div class="scene-content">
+      <span class="kicker">02 · ASIGNAMOS</span>
+      <h2>Un agente IA por flujo crítico.</h2>
+      <p>A cada área le corresponde un agente especializado — no un chatbot genérico. Originación, análisis de crédito, cobranza temprana, atención al cliente, marketing y ventas. Quince agentes entrenados en el dominio Attendo, con acceso a su CRM y a su lenguaje específico.</p>
+      <div class="pill-row">
+        <span class="pill">15 agentes</span>
+        <span class="pill">24/7</span>
+        <span class="pill">Sin headcount</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene s3" data-stage="3">
+    <div class="scene-content">
+      <span class="kicker">03 · CONECTAMOS</span>
+      <h2>Comunicación constante en ambas direcciones.</h2>
+      <p>Los agentes hablan con el equipo humano de Attendo y entre ellos. Cada llamada, cada solicitud, cada cobranza alimenta el sistema en tiempo real. Sin pausa, sin pérdida de contexto, sin perder ventas mientras nadie ve la consola.</p>
+      <div class="pill-row">
+        <span class="pill">26 canales</span>
+        <span class="pill">Bidireccional</span>
+        <span class="pill">Tiempo real</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene s4" data-stage="4">
+    <!-- Final rest state, no content -->
+  </section>
+
+</main>
+
 <script>
 (function(){
-  // Animated income counter — gradually accumulates "income"
-  const amountEl = document.getElementById('counterAmount');
-  if (!amountEl) return;
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  let total = 0;
-  function tick(){
-    // increment by random amount between ~800 and ~6000 MXN
-    const inc = Math.floor(Math.random() * 5200) + 800;
-    total += inc;
-    amountEl.textContent = total.toLocaleString('en-US');
-    amountEl.classList.add('bump');
-    setTimeout(() => amountEl.classList.remove('bump'), 180);
-
-    // schedule next tick with variable cadence
-    const nextDelay = Math.floor(Math.random() * 900) + 350;
-    setTimeout(tick, nextDelay);
+  // Scroll progress bar
+  const prog = document.getElementById('scrollProg');
+  function onScroll(){
+    const h = document.documentElement;
+    const scrolled = h.scrollTop || document.body.scrollTop;
+    const max = (h.scrollHeight - h.clientHeight) || 1;
+    prog.style.width = Math.min(100, (scrolled / max) * 100) + '%';
   }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
 
-  if (reduced){
-    amountEl.textContent = '486,720';
-  } else {
-    // start after the entrance choreography finishes
-    setTimeout(tick, 3400);
+  // Scene observers — accumulate stage classes on body, toggle in-view on scene
+  const sceneIo = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting){
+        e.target.classList.add('in-view');
+        const stage = parseInt(e.target.dataset.stage, 10);
+        for (let i = 1; i <= stage; i++){
+          document.body.classList.add('s' + i);
+        }
+      } else {
+        // Allow re-fade when scrolling back up (text fades, but stage classes stay)
+        e.target.classList.remove('in-view');
+      }
+    });
+  }, { threshold: 0.4, rootMargin: '0px 0px -15% 0px' });
+  document.querySelectorAll('.scene').forEach(s => sceneIo.observe(s));
+
+  // Counter — animated income
+  const amountEl = document.getElementById('counterAmount');
+  if (amountEl){
+    let total = 0;
+    function tick(){
+      const inc = Math.floor(Math.random() * 5200) + 800;
+      total += inc;
+      amountEl.textContent = total.toLocaleString('en-US');
+      amountEl.classList.add('bump');
+      setTimeout(() => amountEl.classList.remove('bump'), 180);
+      const nextDelay = Math.floor(Math.random() * 900) + 350;
+      setTimeout(tick, nextDelay);
+    }
+    if (reduced){
+      amountEl.textContent = '486,720';
+    } else {
+      setTimeout(tick, 1500);
+    }
   }
 })();
 </script>
