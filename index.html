@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="HAILO × Attendo · Diagnóstico estratégico. Lo que vimos. Cómo lo cerramos." />
+<title>HAILO × Attendo · Diagnóstico</title>
+<link rel="icon" type="image/png" href="assets/favicon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg: #050810;
+    --bg-2: #0a0f1c;
+    --surface: rgba(255,255,255,0.025);
+    --surface-strong: rgba(255,255,255,0.05);
+    --border: rgba(255,255,255,0.07);
+    --border-strong: rgba(255,255,255,0.12);
+    --text: #f3f4f6;
+    --text-2: #c7ccd6;
+    --muted: #7a8294;
+    --hailo: #22d3ee;
+    --hailo-2: #06b6d4;
+    --attendo: #1fd18a;
+    --warn: #fbbf24;
+    --danger: #ef4444;
+    --good: #34d399;
+  }
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0;
+    background: radial-gradient(ellipse at 20% -10%, rgba(34,211,238,0.08), transparent 50%),
+                radial-gradient(ellipse at 90% 10%, rgba(31,209,138,0.05), transparent 50%),
+                linear-gradient(180deg, #04060d 0%, #070b16 60%, #050810 100%);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-feature-settings: 'ss01','cv11';
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.55;
+    min-height: 100vh;
+  }
+  .mono{ font-family:'JetBrains Mono', ui-monospace, monospace; }
+  .container{ max-width: 1180px; margin: 0 auto; padding: 0 28px; }
+
+  /* TOP BAR */
+  header.bar{
+    position: sticky; top:0; z-index:50;
+    background: rgba(5,8,16,0.72);
+    backdrop-filter: saturate(140%) blur(12px);
+    -webkit-backdrop-filter: saturate(140%) blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .bar-inner{ display:flex; align-items:center; justify-content:space-between; padding: 14px 28px; max-width:1380px; margin:0 auto; }
+  .brand{ display:flex; align-items:center; gap:14px; font-weight:700; letter-spacing:.04em; }
+  .brand .hailo{ color: var(--hailo); font-weight:800; letter-spacing:.18em; }
+  .brand .cross{ color: var(--muted); font-weight:500; }
+  .brand img{ height: 22px; opacity:.95; }
+  .bar-meta{ color: var(--muted); font-size: 13px; letter-spacing:.04em; }
+  .bar-meta .dot{ display:inline-block; width:6px; height:6px; border-radius:50%; background: var(--good); margin-right:8px; box-shadow: 0 0 12px var(--good); }
+
+  /* HERO */
+  .hero{ padding: 110px 0 80px; position:relative; overflow:hidden; }
+  .hero .grid-overlay{
+    position:absolute; inset:0; pointer-events:none; opacity:.4;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+  }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:10px;
+    padding: 6px 12px; border:1px solid var(--border-strong); border-radius: 999px;
+    font-size: 12px; letter-spacing:.18em; text-transform: uppercase; color: var(--text-2);
+    background: var(--surface);
+  }
+  .eyebrow .pulse{ width:6px; height:6px; border-radius:50%; background: var(--hailo); box-shadow: 0 0 14px var(--hailo); }
+  h1.hero-title{
+    font-size: clamp(48px, 8vw, 96px);
+    line-height: 0.98;
+    letter-spacing: -0.035em;
+    font-weight: 800;
+    margin: 28px 0 22px;
+  }
+  h1.hero-title .accent{ color: var(--hailo); }
+  h1.hero-title .strike{ color: var(--text-2); }
+  .lede{ font-size: clamp(18px, 1.5vw, 22px); color: var(--text-2); max-width: 760px; line-height:1.55; }
+  .lede em{ color: var(--hailo); font-style: normal; font-weight:600; }
+  .lede strong{ color: var(--text); font-weight:600; }
+
+  .stat-strip{
+    margin-top: 56px;
+    display:grid; grid-template-columns: repeat(7, 1fr); gap:0;
+    border: 1px solid var(--border); border-radius: 14px;
+    background: var(--surface);
+    overflow: hidden;
+  }
+  .stat-strip > div{
+    padding: 22px 18px;
+    border-right: 1px solid var(--border);
+  }
+  .stat-strip > div:last-child{ border-right: none; }
+  .stat-strip .v{ font-family:'JetBrains Mono', monospace; font-size: 22px; font-weight:600; color: var(--text); letter-spacing:-0.01em; }
+  .stat-strip .v.zero{ color: var(--danger); }
+  .stat-strip .v.green{ color: var(--attendo); }
+  .stat-strip .l{ font-size: 11px; color: var(--muted); letter-spacing:.12em; text-transform: uppercase; margin-top:6px; }
+  @media (max-width: 880px){
+    .stat-strip{ grid-template-columns: repeat(2, 1fr); }
+    .stat-strip > div{ border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .stat-strip > div:nth-child(2n){ border-right: none; }
+  }
+
+  .hero-cta{ margin-top: 44px; display:flex; gap:14px; flex-wrap:wrap; }
+  .btn{
+    display:inline-flex; align-items:center; gap:10px;
+    padding: 14px 22px; border-radius: 10px; font-weight:600; font-size:15px;
+    text-decoration:none; transition: all .2s ease;
+    border: 1px solid var(--border-strong);
+  }
+  .btn.primary{ background: var(--hailo); color:#04060d; border-color: var(--hailo); }
+  .btn.primary:hover{ background:#67e8f9; transform: translateY(-1px); }
+  .btn.ghost{ color: var(--text-2); background: transparent; }
+  .btn.ghost:hover{ background: var(--surface-strong); color: var(--text); }
+  .btn .arrow{ transition: transform .2s ease; }
+  .btn:hover .arrow{ transform: translateX(3px); }
+
+  /* SECTIONS */
+  section{ padding: 100px 0; border-top: 1px solid var(--border); position: relative; }
+  .sec-head{ display:flex; align-items: baseline; gap: 18px; margin-bottom: 44px; }
+  .sec-num{ font-family:'JetBrains Mono', monospace; color: var(--hailo); font-size: 13px; letter-spacing:.16em; }
+  .sec-title{ font-size: clamp(28px, 4vw, 42px); font-weight:800; letter-spacing:-0.025em; margin:0; line-height:1.1; }
+  .sec-sub{ color: var(--text-2); font-size: 17px; max-width: 760px; margin-top: 10px; }
+
+  /* CARDS */
+  .grid{ display:grid; gap:18px; }
+  .cards-3{ grid-template-columns: repeat(3, 1fr); }
+  .cards-2{ grid-template-columns: repeat(2, 1fr); }
+  .cards-4{ grid-template-columns: repeat(4, 1fr); }
+  @media (max-width: 880px){ .cards-3,.cards-4{ grid-template-columns: 1fr; } .cards-2{ grid-template-columns:1fr; } }
+
+  .card{
+    background: var(--surface);
+    border:1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    transition: all .2s ease;
+  }
+  .card:hover{ border-color: var(--border-strong); background: var(--surface-strong); transform: translateY(-2px); }
+  .card .kicker{ font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:.16em; color: var(--muted); text-transform:uppercase; }
+  .card h3{ margin: 10px 0 8px; font-size: 19px; letter-spacing:-0.01em; }
+  .card p{ color: var(--text-2); font-size: 15px; margin:0; }
+  .card.accent-hailo{ border-color: rgba(34,211,238,0.25); background: linear-gradient(180deg, rgba(34,211,238,0.05), rgba(34,211,238,0.01)); }
+  .card.accent-attendo{ border-color: rgba(31,209,138,0.25); background: linear-gradient(180deg, rgba(31,209,138,0.05), rgba(31,209,138,0.01)); }
+  .card.accent-warn{ border-color: rgba(251,191,36,0.25); background: linear-gradient(180deg, rgba(251,191,36,0.04), rgba(251,191,36,0.005)); }
+  .card.accent-danger{ border-color: rgba(239,68,68,0.25); background: linear-gradient(180deg, rgba(239,68,68,0.05), rgba(239,68,68,0.01)); }
+
+  /* TECH STACK BLOCKS */
+  .stack{ display:grid; grid-template-columns: 1fr; gap: 16px; }
+  .stack-layer{
+    border:1px solid var(--border); border-radius: 14px; padding: 18px 22px;
+    background: var(--surface);
+    display:grid; grid-template-columns: 220px 1fr; gap: 24px; align-items: center;
+  }
+  .stack-layer .layer-name{ font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:.16em; color: var(--hailo); text-transform: uppercase; }
+  .stack-layer .layer-name .small{ display:block; color: var(--muted); margin-top:4px; font-size:11px; letter-spacing:.1em; }
+  .stack-layer .layer-body{ display:flex; gap:10px; flex-wrap:wrap; }
+  .tech-chip{
+    display:inline-flex; align-items:center; gap:8px;
+    padding: 8px 14px; border:1px solid var(--border-strong); border-radius: 8px;
+    background: rgba(255,255,255,0.03); color: var(--text-2); font-size: 13px;
+  }
+  .tech-chip.confirmed::before{ content:''; width:6px; height:6px; border-radius:50%; background: var(--good); box-shadow: 0 0 8px var(--good); }
+  .tech-chip.deprecated{ opacity: .55; text-decoration: line-through; text-decoration-color: var(--danger); }
+  .tech-chip.deprecated::before{ content:''; width:6px; height:6px; border-radius:50%; background: var(--danger); }
+  .tech-chip.weak::before{ content:''; width:6px; height:6px; border-radius:50%; background: var(--warn); box-shadow: 0 0 8px var(--warn); }
+  @media (max-width: 720px){ .stack-layer{ grid-template-columns: 1fr; gap:12px; } }
+
+  /* OPS PIPELINE */
+  .ops{
+    display:grid; grid-template-columns: repeat(5, 1fr); gap: 12px;
+    border:1px solid var(--border); border-radius: 14px; padding: 22px;
+    background: var(--surface);
+    position: relative;
+  }
+  @media (max-width: 880px){ .ops{ grid-template-columns: 1fr; } }
+  .lane{ padding: 6px; }
+  .lane h4{ margin:0 0 12px; font-size: 14px; font-weight:600; letter-spacing:.04em; color: var(--hailo); text-transform: uppercase; font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:.16em; }
+  .lane ul{ margin:0; padding:0; list-style: none; display:grid; gap:8px; }
+  .lane li{
+    background: rgba(255,255,255,0.03); border:1px solid var(--border);
+    border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--text-2);
+  }
+  .lane li .who{ display:block; font-size:11px; color: var(--muted); margin-top:4px; font-family:'JetBrains Mono', monospace; letter-spacing:.06em; }
+
+  /* GAPS */
+  .gap-list{ display:grid; grid-template-columns: repeat(2,1fr); gap: 14px; }
+  @media (max-width: 880px){ .gap-list{ grid-template-columns: 1fr; } }
+  .gap{
+    display:grid; grid-template-columns: 38px 1fr; gap: 14px; align-items: start;
+    padding: 16px 18px; background: var(--surface); border:1px solid var(--border); border-radius: 12px;
+    border-left: 3px solid var(--danger);
+  }
+  .gap.amber{ border-left-color: var(--warn); }
+  .gap .badge{
+    font-family:'JetBrains Mono', monospace; font-size: 14px; font-weight: 600;
+    color: var(--danger); background: rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.2);
+    width: 34px; height: 34px; border-radius: 8px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .gap.amber .badge{ color: var(--warn); background: rgba(251,191,36,0.08); border-color: rgba(251,191,36,0.2); }
+  .gap h4{ margin: 0 0 4px; font-size: 16px; }
+  .gap p{ margin:0; font-size: 14px; color: var(--text-2); }
+  .gap .src{ display:block; margin-top:6px; font-size:11px; color: var(--muted); font-family:'JetBrains Mono', monospace; }
+
+  /* OPPORTUNITIES TIERS */
+  .tier{ margin-top: 36px; }
+  .tier-head{ display:flex; align-items:baseline; gap: 14px; margin-bottom: 18px; }
+  .tier-badge{
+    font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:.16em;
+    padding: 4px 10px; border-radius:6px; text-transform: uppercase;
+  }
+  .tier-badge.t1{ background: rgba(34,211,238,0.12); color: var(--hailo); border:1px solid rgba(34,211,238,0.25); }
+  .tier-badge.t2{ background: rgba(251,191,36,0.10); color: var(--warn); border:1px solid rgba(251,191,36,0.22); }
+  .tier-badge.t3{ background: rgba(255,255,255,0.04); color: var(--text-2); border:1px solid var(--border-strong); }
+  .tier-title{ font-size: 18px; font-weight:700; margin:0; letter-spacing:-0.01em; }
+  .tier-desc{ color: var(--muted); font-size: 14px; }
+
+  .opp{
+    background: var(--surface); border:1px solid var(--border); border-radius: 14px;
+    padding: 22px;
+    display:grid; gap: 10px;
+    transition: all .2s ease;
+  }
+  .opp:hover{ border-color: var(--hailo); transform: translateY(-2px); }
+  .opp .ono{ font-family:'JetBrains Mono', monospace; font-size:12px; color: var(--hailo); letter-spacing:.16em; }
+  .opp h4{ font-size: 18px; margin: 0; letter-spacing:-0.01em; }
+  .opp p{ font-size: 14px; color: var(--text-2); margin:0; }
+  .opp .meta{ display:flex; gap: 14px; margin-top: 8px; font-size: 12px; color: var(--muted); font-family:'JetBrains Mono', monospace; }
+  .opp .meta span{ display:inline-flex; align-items:center; gap:6px; }
+
+  /* WEDGE */
+  .wedge{
+    border: 1px solid rgba(34,211,238,0.35);
+    background:
+      radial-gradient(ellipse at 80% 0%, rgba(34,211,238,0.08), transparent 50%),
+      linear-gradient(180deg, rgba(34,211,238,0.04), rgba(34,211,238,0.01));
+    border-radius: 18px;
+    padding: 36px;
+    display:grid; grid-template-columns: 1.4fr 1fr; gap: 36px;
+    align-items: center;
+  }
+  @media (max-width: 880px){ .wedge{ grid-template-columns: 1fr; } }
+  .wedge .ribbon{ display:inline-flex; align-items:center; gap:8px; padding: 6px 12px; background: rgba(34,211,238,0.12); border:1px solid rgba(34,211,238,0.3); border-radius: 999px; font-size: 12px; letter-spacing:.16em; text-transform: uppercase; color: var(--hailo); font-family:'JetBrains Mono', monospace; }
+  .wedge h3{ font-size: clamp(26px, 3vw, 36px); letter-spacing:-0.02em; margin: 18px 0 14px; }
+  .wedge p{ font-size: 16px; color: var(--text-2); margin: 0 0 14px; }
+  .wedge ul{ margin: 14px 0 0; padding:0; list-style: none; display:grid; gap: 8px; }
+  .wedge ul li{ color: var(--text-2); font-size: 14px; display:flex; gap:10px; align-items:flex-start; }
+  .wedge ul li::before{ content:''; width:6px; height:6px; border-radius:50%; background: var(--hailo); margin-top:8px; flex:none; }
+  .wedge .panel{
+    background: rgba(255,255,255,0.03); border:1px solid var(--border-strong);
+    border-radius: 12px; padding: 22px;
+  }
+  .wedge .panel .row{ display:flex; justify-content:space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .wedge .panel .row:last-child{ border-bottom: none; }
+  .wedge .panel .row .k{ color: var(--muted); font-size:13px; font-family:'JetBrains Mono', monospace; letter-spacing:.04em; }
+  .wedge .panel .row .v{ font-weight:600; font-size:14px; color: var(--text); }
+  .wedge .panel .row .v.cyan{ color: var(--hailo); }
+
+  /* ROADMAP */
+  .roadmap{
+    display:grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+    border:1px solid var(--border); border-radius: 14px; overflow: hidden;
+  }
+  @media (max-width: 880px){ .roadmap{ grid-template-columns: 1fr; } }
+  .phase{
+    padding: 22px; border-right: 1px solid var(--border);
+    background: var(--surface);
+    position: relative;
+  }
+  .phase:last-child{ border-right: none; }
+  @media (max-width: 880px){ .phase{ border-right: none; border-bottom: 1px solid var(--border); } }
+  .phase .ph{ font-family:'JetBrains Mono', monospace; color: var(--hailo); font-size: 11px; letter-spacing:.16em; }
+  .phase h4{ font-size: 17px; margin: 8px 0 8px; }
+  .phase p{ font-size: 13px; color: var(--text-2); margin:0 0 10px; }
+  .phase .bar{ height: 4px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; }
+  .phase .bar > div{ height: 100%; background: linear-gradient(90deg, var(--hailo), var(--attendo)); }
+
+  /* IMPACT */
+  .impact-grid{ display:grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  @media (max-width: 880px){ .impact-grid{ grid-template-columns: repeat(2,1fr); } }
+  .impact{
+    border:1px solid var(--border); border-radius: 14px; padding: 24px;
+    background: var(--surface);
+    text-align: left;
+  }
+  .impact .num{ font-family:'JetBrains Mono', monospace; font-size: 38px; font-weight: 600; letter-spacing:-0.02em; color: var(--hailo); }
+  .impact .num.green{ color: var(--attendo); }
+  .impact .lbl{ color: var(--text-2); font-size: 13px; margin-top: 6px; }
+  .impact .det{ color: var(--muted); font-size:12px; margin-top: 8px; font-family:'JetBrains Mono', monospace; }
+
+  /* FINAL CTA */
+  .final{
+    margin-top: 24px;
+    border:1px solid var(--border-strong); border-radius: 18px;
+    padding: 60px 44px;
+    background:
+      radial-gradient(ellipse at 80% 50%, rgba(34,211,238,0.06), transparent 50%),
+      linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+    text-align: center;
+  }
+  .final h3{ font-size: clamp(30px, 4vw, 48px); letter-spacing:-0.025em; margin: 0 0 14px; }
+  .final h3 .cyan{ color: var(--hailo); }
+  .final p{ color: var(--text-2); font-size: 18px; max-width: 620px; margin: 0 auto 30px; }
+
+  /* FOOTER */
+  footer{ border-top:1px solid var(--border); padding: 32px 0; color: var(--muted); font-size: 13px; }
+  footer .container{ display:flex; justify-content:space-between; align-items:center; gap: 14px; flex-wrap: wrap; }
+  footer .mono{ font-size: 12px; letter-spacing:.08em; }
+
+  /* Subtle reveal */
+  @keyframes rise { from{ opacity:0; transform: translateY(12px); } to{ opacity:1; transform: none; } }
+  .rise{ animation: rise .6s ease both; }
+  .rise.d1{ animation-delay: .08s; }
+  .rise.d2{ animation-delay: .16s; }
+  .rise.d3{ animation-delay: .24s; }
+
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="bar-inner">
+    <div class="brand">
+      <span class="hailo">HAILO</span>
+      <span class="cross">×</span>
+      <img src="assets/attendo-logo.png" alt="Attendo" />
+    </div>
+    <div class="bar-meta"><span class="dot"></span> Diagnóstico · Mayo 2026</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="grid-overlay"></div>
+    <div class="container">
+      <div class="eyebrow rise"><span class="pulse"></span> HAILO INTELLIGENCE DESK</div>
+      <h1 class="hero-title rise d1">
+        Conocemos<br/>
+        <span class="accent">Attendo.</span>
+      </h1>
+      <p class="lede rise d2">
+        Una SOFOM de <strong>18 años</strong> con un stack que <strong>aguanta</strong> — SAP, CrediSys, Microsoft 365, Deloitte como auditor — y un punto ciego del tamaño del mercado: <em>cero iniciativas de IA en producción</em>. Esto es lo que vimos. Esto es cómo lo cerramos.
+      </p>
+
+      <div class="stat-strip rise d3">
+        <div><div class="v">60,255</div><div class="l">Clientes</div></div>
+        <div><div class="v">117,330</div><div class="l">Créditos otorgados</div></div>
+        <div><div class="v">1,155</div><div class="l">Asesores</div></div>
+        <div><div class="v">22</div><div class="l">Sucursales</div></div>
+        <div><div class="v">27</div><div class="l">Estados</div></div>
+        <div><div class="v green">18</div><div class="l">Años operando</div></div>
+        <div><div class="v zero">0</div><div class="l">IA en producción</div></div>
+      </div>
+
+      <div class="hero-cta rise d3">
+        <a href="#diagnostico" class="btn primary">Ver diagnóstico <span class="arrow">→</span></a>
+        <a href="#wedge" class="btn ghost">Saltar al wedge</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 01 QUIÉNES SON -->
+  <section id="diagnostico">
+    <div class="container">
+      <div class="sec-head">
+        <span class="sec-num">01 · CONTEXTO</span>
+      </div>
+      <h2 class="sec-title">Antes de hablar de IA — quiénes son.</h2>
+      <p class="sec-sub">Una lectura honesta de la empresa, no del pitch. Datos de fuentes públicas verificables.</p>
+
+      <div class="grid cards-3" style="margin-top:36px;">
+        <div class="card">
+          <div class="kicker">Identidad</div>
+          <h3>SOFOM ENR · 2007</h3>
+          <p>Sociedad Financiera de Objeto Múltiple, Entidad No Regulada. Capital 100% mexicano. HQ en Torre Okto, San Pedro Garza García, NL. Auditados por Deloitte, certificación ISO declarada, miembros AMDEN.</p>
+        </div>
+        <div class="card">
+          <div class="kicker">Modelo de negocio</div>
+          <h3>Crédito vía descuento por nómina</h3>
+          <p>Foco en trabajadores del sector público (jubilados, pensionados, gobierno) y privado. Especialidad declarada: refinanciamiento de deuda. Cliente típico consolida deudas más caras en un crédito Attendo.</p>
+        </div>
+        <div class="card">
+          <div class="kicker">Productos</div>
+          <h3>Tres líneas activas</h3>
+          <p>Crédito Simple sin Aval ($5k–$250k MXN, 6–60 meses, 47.93% tasa fija), Crédito Electrónico CREE, Crédito Simple Digital. Sub-marca operativa <span class="mono" style="color:var(--attendo)">Vive&nbsp;Préstamo</span>.</p>
+        </div>
+      </div>
+
+      <div class="grid cards-4" style="margin-top:18px;">
+        <div class="card">
+          <div class="kicker">CEO · Co-founder</div>
+          <h3>Andrés Cueva</h3>
+          <p>Desde 2010. Basado en San Nicolás de los Garza, NL.</p>
+        </div>
+        <div class="card">
+          <div class="kicker">CFO</div>
+          <h3>Alejandro Vidrio</h3>
+          <p>Monterrey. Reportes financieros, tesorería, auditoría con Deloitte.</p>
+        </div>
+        <div class="card">
+          <div class="kicker">Director Operaciones y Riesgo</div>
+          <h3>Jesús Treviño</h3>
+          <p>San Pedro Garza García. Política de crédito, operación de cartera, riesgo.</p>
+        </div>
+        <div class="card">
+          <div class="kicker">DG · Vive Préstamo</div>
+          <h3>Jaime Flores</h3>
+          <p>Lidera la sub-marca / canal complementario de originación nómina.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 STACK TÉCNICO -->
+  <section>
+    <div class="container">
+      <div class="sec-head">
+        <span class="sec-num">02 · STACK</span>
+      </div>
+      <h2 class="sec-title">Lo que ya tienen — más maduro de lo que aparenta.</h2>
+      <p class="sec-sub">Cada pieza fue verificada vía inspección directa (DNS, headers HTTP, fingerprint de subdominios, app stores, certificate transparency).</p>
+
+      <div class="stack" style="margin-top:36px;">
+
+        <div class="stack-layer">
+          <div class="layer-name">CORE FINANCIERO <span class="small">Robusto · 8 años en producción</span></div>
+          <div class="layer-body">
+            <span class="tech-chip confirmed">SAP Banking</span>
+            <span class="tech-chip confirmed">DYCSI implementador (2017)</span>
+            <span class="tech-chip confirmed">Audit Deloitte</span>
+            <span class="tech-chip confirmed">ISO certified</span>
+          </div>
+        </div>
+
+        <div class="stack-layer">
+          <div class="layer-name">PLATAFORMA OPERATIVA <span class="small">SaaS multi-tenant</span></div>
+          <div class="layer-body">
+            <span class="tech-chip confirmed">CrediSys Integra</span>
+            <span class="tech-chip confirmed">Microsoft IIS 10</span>
+            <span class="tech-chip confirmed">ASP.NET</span>
+            <span class="tech-chip confirmed">attendo.credisysintegra.com.mx</span>
+          </div>
+        </div>
+
+        <div class="stack-layer">
+          <div class="layer-name">PRODUCTIVIDAD <span class="small">Ecosistema Microsoft</span></div>
+          <div class="layer-body">
+            <span class="tech-chip confirmed">Microsoft 365</span>
+            <span class="tech-chip confirmed">Exchange Online</span>
+            <span class="tech-chip confirmed">Outlook · Teams · Excel</span>
+          </div>
+        </div>
+
+        <div class="stack-layer">
+          <div class="layer-name">MOBILE <span class="small">Deuda técnica</span></div>
+          <div class="layer-body">
+            <span class="tech-chip weak">Attendo Connect · Basic4Android (asesores)</span>
+            <span class="tech-chip weak">Attendo móvil · TecnoCen (cliente)</span>
+            <span class="tech-chip deprecated">Última actualización oct 2021</span>
+          </div>
+        </div>
+
+        <div class="stack-layer">
+          <div class="layer-name">WEB / PÚBLICO <span class="small">Brochure estático</span></div>
+          <div class="layer-body">
+            <span class="tech-chip confirmed">Apache + HTTP/2</span>
+            <span class="tech-chip confirmed">jQuery 3.6 + Bootstrap</span>
+            <span class="tech-chip confirmed">GoDaddy · cPanel</span>
+            <span class="tech-chip weak">Sin SPA · sin personalización</span>
+          </div>
+        </div>
+
+        <div class="stack-layer">
+          <div class="layer-name">CANALES CLIENTE <span class="small">Tradicionales</span></div>
+          <div class="layer-body">
+            <span class="tech-chip confirmed">Call center 800 · 818</span>
+            <span class="tech-chip confirmed">22 sucursales presenciales</span>
+            <span class="tech-chip weak">WhatsApp · solo deeplink, sin bot</span>
+            <span class="tech-chip confirmed">Email info@attendo.com.mx</span>
+          </div>
+        </div>
+
+        <div class="stack-layer">
+          <div class="layer-name">MARKETING DIGITAL <span class="small">Activo</span></div>
+          <div class="layer-body">
+            <span class="tech-chip confirmed">Google Tag Manager</span>
+            <span class="tech-chip confirmed">Meta / Facebook Pixel</span>
+            <span class="tech-chip confirmed">LinkedIn corporativo</span>
+            <span class="tech-chip weak">1 community manager (becaria)</span>
+          </div>
+        </div>
+
+        <div class="stack-layer">
+          <div class="layer-name">INTEGRACIONES EXTERNAS <span class="small">Declaradas o inferidas</span></div>
+          <div class="layer-body">
+            <span class="tech-chip confirmed">Buró de Crédito</span>
+            <span class="tech-chip confirmed">CONDUSEF</span>
+            <span class="tech-chip confirmed">AMDEN</span>
+            <span class="tech-chip confirmed">Convenios B2B empleadores (descuento nómina)</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 OPERACIONES -->
+  <section>
+    <div class="container">
+      <div class="sec-head">
+        <span class="sec-num">03 · OPERACIONES</span>
+      </div>
+      <h2 class="sec-title">Cómo opera Attendo cada día — verificado.</h2>
+      <p class="sec-sub">Reconstruido desde vacantes reales (LinkedIn, Indeed, Glassdoor), FAQ pública, reseñas de empleados, productos publicados y apps móviles. Sin especulación.</p>
+
+      <div class="ops" style="margin-top:36px;">
+
+        <div class="lane">
+          <h4>Originación</h4>
+          <ul>
+            <li>Promotor visita en campo<span class="who">Promotor de crédito · 1,155 asesores</span></li>
+            <li>Captura en app Attendo Connect<span class="who">Simulador + form</span></li>
+            <li>Telemarketing emite leads<span class="who">$11.6k/mes promedio</span></li>
+            <li>Asesor en sucursal cierra<span class="who">22 oficinas</span></li>
+          </ul>
+        </div>
+
+        <div class="lane">
+          <h4>Análisis</h4>
+          <ul>
+            <li>Consulta a Buró de Crédito<span class="who">link en sitio público</span></li>
+            <li>Cálculo capacidad de pago<span class="who">ingreso − gastos − deudas</span></li>
+            <li>Decisión &lt; 48h<span class="who">FAQ oficial</span></li>
+            <li>Reglas en CrediSys + SAP<span class="who">rule-based, no ML</span></li>
+          </ul>
+        </div>
+
+        <div class="lane">
+          <h4>Pagos</h4>
+          <ul>
+            <li>Descuento vía nómina<span class="who">convenio B2B empleador</span></li>
+            <li>Descuento bancario<span class="who">producto CREE</span></li>
+            <li>Conciliación SAP<span class="who">7 personas / 60k clientes</span></li>
+            <li>Pagos adelantados sin comisión<span class="who">FAQ</span></li>
+          </ul>
+        </div>
+
+        <div class="lane">
+          <h4>Cobranza</h4>
+          <ul>
+            <li>Call center telefónico<span class="who">turnos rotativos · horas extra</span></li>
+            <li>Gestor en campo<span class="who">visita · formato diario · app</span></li>
+            <li>Cobranza extrajudicial<span class="who">$8k/mes promedio</span></li>
+            <li>Convenios de pago<span class="who">en visita</span></li>
+          </ul>
+        </div>
+
+        <div class="lane">
+          <h4>Soporte</h4>
+          <ul>
+            <li>Línea 800 / 818<span class="who">centro de servicio</span></li>
+            <li>Sucursal presencial<span class="who">22 oficinas</span></li>
+            <li>WhatsApp wa.me<span class="who">solo deeplink, sin bot</span></li>
+            <li>Email info@<span class="who">manual</span></li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 BRECHAS -->
+  <section>
+    <div class="container">
+      <div class="sec-head">
+        <span class="sec-num">04 · BRECHAS</span>
+      </div>
+      <h2 class="sec-title">Las brechas que cuestan dinero — hoy.</h2>
+      <p class="sec-sub">Cada brecha es una operación humana sustituible o una capacidad inexistente. Cada una es un caso de negocio.</p>
+
+      <div class="gap-list" style="margin-top:36px;">
+
+        <div class="gap">
+          <div class="badge">01</div>
+          <div>
+            <h4>Cero IA en producción</h4>
+            <p>Sin vacantes de Data Scientist, sin partners de IA, sin chatbot, sin scoring ML, sin OCR. El sector se mueve hacia IA generativa; Attendo todavía no.</p>
+            <span class="src">Búsqueda LinkedIn · Indeed · OCC · Glassdoor · partners</span>
+          </div>
+        </div>
+
+        <div class="gap">
+          <div class="badge">02</div>
+          <div>
+            <h4>App cliente abandonada</h4>
+            <p>Última actualización: <span class="mono">31 oct 2021</span>. 500+ descargas para 60k clientes = adopción &lt;1%. Categoría "Lifestyle" en Play Store (mal SEO).</p>
+            <span class="src">Google Play · App Store · TecnoCen developer</span>
+          </div>
+        </div>
+
+        <div class="gap">
+          <div class="badge">03</div>
+          <div>
+            <h4>WhatsApp es deeplink, no bot</h4>
+            <p>El canal preferido del mexicano apunta a wa.me sin automatización. Cada consulta de saldo, próximo pago o duda básica termina en humano o sucursal.</p>
+            <span class="src">Inspección sitio attendo.com.mx</span>
+          </div>
+        </div>
+
+        <div class="gap">
+          <div class="badge">04</div>
+          <div>
+            <h4>Cobranza intensiva en humanos</h4>
+            <p>Call center con turnos rotativos, horas extra no pagadas (reseñas Indeed). Gestor en campo capturando formato a mano. Todo escalable con voicebot y ruta IA.</p>
+            <span class="src">Reseñas empleados · vacantes activas</span>
+          </div>
+        </div>
+
+        <div class="gap amber">
+          <div class="badge">05</div>
+          <div>
+            <h4>Originación con 1,155 asesores humanos</h4>
+            <p>CAC alto, escalamiento lineal con headcount. Sin originación digital end-to-end masiva. El producto "Simple Digital" existe pero no es el canal principal.</p>
+            <span class="src">Sitio oficial · LinkedIn jobs</span>
+          </div>
+        </div>
+
+        <div class="gap amber">
+          <div class="badge">06</div>
+          <div>
+            <h4>Stack mobile legacy (Basic4Android)</h4>
+            <p>La app de asesores corre en B4A — RAD pago no estándar. Para sumar OCR, biometría, NFC o integración WhatsApp hay que reescribir.</p>
+            <span class="src">Package name b4a.AttendoAsesores2</span>
+          </div>
+        </div>
+
+        <div class="gap amber">
+          <div class="badge">07</div>
+          <div>
+            <h4>Scoring rule-based en mercado que cambió</h4>
+            <p>Banxico abrió portabilidad de crédito de nómina en <span class="mono">jul-2025</span>. Bancos vienen por la cartera de Attendo. Sin ML defensivo, perder cartera es cuestión de tiempo.</p>
+            <span class="src">Infobae · CONDUSEF · sector</span>
+          </div>
+        </div>
+
+        <div class="gap amber">
+          <div class="badge">08</div>
+          <div>
+            <h4>Marketing sin personalización</h4>
+            <p>Sitio idéntico para jubilado, gobierno, privado. Una sola becaria de community manager. Meta Ads activos pero sin creativos segmentados por cohorte.</p>
+            <span class="src">Inspección sitio · org chart Indeed</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 OPORTUNIDADES -->
+  <section>
+    <div class="container">
+      <div class="sec-head">
+        <span class="sec-num">05 · OPORTUNIDADES</span>
+      </div>
+      <h2 class="sec-title">Cómo HAILO los acelera.</h2>
+      <p class="sec-sub">Nueve iniciativas ordenadas por ROI y fricción de implementación. Cada una conecta con una operación verificada arriba.</p>
+
+      <div class="tier">
+        <div class="tier-head">
+          <span class="tier-badge t1">TIER 1 · QUICK WIN</span>
+          <h3 class="tier-title">Implementación 3–8 semanas · ROI inmediato</h3>
+        </div>
+        <div class="grid cards-3">
+          <div class="opp">
+            <div class="ono">01</div>
+            <h4>Agente WhatsApp Cliente</h4>
+            <p>Saldo, próximo pago, comprobantes, simulador, agendamiento — 24/7 sin agente humano. Sustituye consultas básicas del call center.</p>
+            <div class="meta">
+              <span>● Externo</span>
+              <span>● 4 sem</span>
+              <span>● Bajo esfuerzo</span>
+            </div>
+          </div>
+          <div class="opp">
+            <div class="ono">02</div>
+            <h4>Voicebot Cobranza Tramo 1–30</h4>
+            <p>Recordatorios automáticos y parcialidades light por voz/texto. Libera al call center para casos complejos. Reduce horas extra.</p>
+            <div class="meta">
+              <span>● Interno + Cliente</span>
+              <span>● 6–8 sem</span>
+              <span>● Medio esfuerzo</span>
+            </div>
+          </div>
+          <div class="opp">
+            <div class="ono">03</div>
+            <h4>OCR + Autollenado Promotor</h4>
+            <p>Foto de INE + comprobantes → autollena el formulario. Captura de 20 min a 3 min por solicitud. Habilita escala sin más asesores.</p>
+            <div class="meta">
+              <span>● Interno</span>
+              <span>● 4–6 sem</span>
+              <span>● Medio esfuerzo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tier">
+        <div class="tier-head">
+          <span class="tier-badge t2">TIER 2 · MEDIO PLAZO</span>
+          <h3 class="tier-title">Mayor profundidad operativa · 2–4 meses</h3>
+        </div>
+        <div class="grid cards-3">
+          <div class="opp">
+            <div class="ono">04</div>
+            <h4>Pre-expediente Comité Crédito</h4>
+            <p>El analista recibe expediente armado con buró interpretado, capacidad de pago calculada y recomendación. Decisión en minutos vs. horas.</p>
+            <div class="meta">
+              <span>● Interno</span>
+              <span>● 6–8 sem</span>
+              <span>● Medio esfuerzo</span>
+            </div>
+          </div>
+          <div class="opp">
+            <div class="ono">05</div>
+            <h4>Ruta IA Gestor de Campo</h4>
+            <p>Optimización diaria: qué clientes visitar primero (probabilidad de cobro × cercanía geográfica). Captura por voz del reporte de visita.</p>
+            <div class="meta">
+              <span>● Interno</span>
+              <span>● 4 sem</span>
+              <span>● Bajo–medio</span>
+            </div>
+          </div>
+          <div class="opp">
+            <div class="ono">06</div>
+            <h4>Agente WhatsApp Asesor</h4>
+            <p>Para los 1,155 asesores: Q&amp;A de políticas, status de solicitudes, comisiones, simulador rápido — desde el celular en campo.</p>
+            <div class="meta">
+              <span>● Interno</span>
+              <span>● 2–3 sem</span>
+              <span>● Bajo esfuerzo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tier">
+        <div class="tier-head">
+          <span class="tier-badge t3">TIER 3 · ESTRATÉGICO</span>
+          <h3 class="tier-title">Defiende cartera y abre canales · 3–6 meses</h3>
+        </div>
+        <div class="grid cards-3">
+          <div class="opp">
+            <div class="ono">07</div>
+            <h4>Scoring Overlay ML</h4>
+            <p>Modelo que reclasifica rechazados y marginales con señales adicionales. Captura 5–15% de cartera adicional antes de que Banco se la lleve.</p>
+            <div class="meta">
+              <span>● Interno</span>
+              <span>● 3–6 mes</span>
+              <span>● Alto esfuerzo</span>
+            </div>
+          </div>
+          <div class="opp">
+            <div class="ono">08</div>
+            <h4>Renovación App Cliente</h4>
+            <p>App nueva con onboarding biométrico, chat IA, simulador inteligente, alertas de capacidad para nuevo crédito. Habilita renovación digital.</p>
+            <div class="meta">
+              <span>● Cliente</span>
+              <span>● 3–4 mes</span>
+              <span>● Alto esfuerzo</span>
+            </div>
+          </div>
+          <div class="opp">
+            <div class="ono">09</div>
+            <h4>Copilot Legal · Contratos</h4>
+            <p>Redacción asistida de contratos estandarizados (adhesión, crédito, arrendamiento, servicios). Atención automática a requerimientos de autoridades.</p>
+            <div class="meta">
+              <span>● Interno</span>
+              <span>● 3–4 sem</span>
+              <span>● Bajo esfuerzo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 06 WEDGE -->
+  <section id="wedge">
+    <div class="container">
+      <div class="sec-head">
+        <span class="sec-num">06 · POR DÓNDE EMPEZAMOS</span>
+      </div>
+      <h2 class="sec-title">El wedge: Agente WhatsApp Cliente.</h2>
+      <p class="sec-sub">No empezamos por lo más ambicioso. Empezamos por lo más rentable, menos riesgoso y más demostrable. En 4 semanas Attendo tiene un activo nuevo en producción.</p>
+
+      <div class="wedge" style="margin-top:36px;">
+        <div>
+          <span class="ribbon">FASE 1 · WEDGE</span>
+          <h3>Cuatro semanas. Cero riesgo regulatorio. ROI medible desde el primer día.</h3>
+          <p>El canal ya existe — Attendo tiene número WhatsApp (81 1686 1396) y deeplink en sitio público. Hoy es buzón humano. Mañana es agente IA inteligente con acceso a CrediSys vía API/RPA.</p>
+          <ul>
+            <li><span><strong>No toca SAP.</strong> Riesgo de auditoría Deloitte: cero.</span></li>
+            <li><span><strong>Conecta a CrediSys</strong> vía API o RPA según lo que expongan.</span></li>
+            <li><span><strong>Deflexión inmediata</strong> de llamadas al 800 y consultas a sucursal.</span></li>
+            <li><span><strong>24/7</strong> sin agregar headcount al call center.</span></li>
+            <li><span><strong>Métrica clara</strong>: % consultas resueltas sin humano, costo por interacción, NPS.</span></li>
+          </ul>
+        </div>
+        <div class="panel">
+          <div class="row"><span class="k">Tipo</span><span class="v">B2C · canal vivo</span></div>
+          <div class="row"><span class="k">Duración</span><span class="v cyan">4 semanas</span></div>
+          <div class="row"><span class="k">Modelo IA</span><span class="v">Claude Sonnet 4.6</span></div>
+          <div class="row"><span class="k">Integraciones</span><span class="v">WA Cloud · CrediSys</span></div>
+          <div class="row"><span class="k">Volumen estimado</span><span class="v">1,500–4,000 conv/día</span></div>
+          <div class="row"><span class="k">Inversión Fase 1</span><span class="v cyan">$250k–$500k MXN</span></div>
+          <div class="row"><span class="k">Pago</span><span class="v">30 / 70</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 ROADMAP -->
+  <section>
+    <div class="container">
+      <div class="sec-head">
+        <span class="sec-num">07 · ROADMAP</span>
+      </div>
+      <h2 class="sec-title">Seis meses · cuatro fases.</h2>
+      <p class="sec-sub">Cada fase entrega valor independiente. La fase 2 no espera a que se cumpla la 1 — corre en paralelo una vez aprobado el wedge.</p>
+
+      <div class="roadmap" style="margin-top:36px;">
+        <div class="phase">
+          <div class="ph">MES 1</div>
+          <h4>Wedge — WhatsApp Cliente</h4>
+          <p>Agente conversacional 24/7 con acceso a saldo, pagos y simulador. Lanzamiento beta a 2,000 clientes.</p>
+          <div class="bar"><div style="width:100%"></div></div>
+        </div>
+        <div class="phase">
+          <div class="ph">MES 2–3</div>
+          <h4>Voicebot Cobranza 1–30</h4>
+          <p>Recordatorios y parcialidades light por voz/texto. Integración con marcador del call center.</p>
+          <div class="bar"><div style="width:85%"></div></div>
+        </div>
+        <div class="phase">
+          <div class="ph">MES 3–4</div>
+          <h4>OCR Promotor + Asesor WA</h4>
+          <p>Captura asistida en campo + agente interno para asesores en su celular.</p>
+          <div class="bar"><div style="width:70%"></div></div>
+        </div>
+        <div class="phase">
+          <div class="ph">MES 5–6</div>
+          <h4>Pre-expediente + Ruta IA</h4>
+          <p>Analista de crédito asistido + ruta optimizada del gestor en campo.</p>
+          <div class="bar"><div style="width:55%"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 IMPACTO -->
+  <section>
+    <div class="container">
+      <div class="sec-head">
+        <span class="sec-num">08 · IMPACTO ESPERADO</span>
+      </div>
+      <h2 class="sec-title">Lo que cambia en los KPIs.</h2>
+      <p class="sec-sub">Rangos basados en benchmarks comparables de SOFOMs y fintechs latinoamericanas con implementaciones equivalentes. No promesas: hipótesis verificables.</p>
+
+      <div class="impact-grid" style="margin-top:36px;">
+        <div class="impact">
+          <div class="num">40–60%</div>
+          <div class="lbl">Deflexión de llamadas al 800</div>
+          <div class="det">Wedge WA · Mes 2</div>
+        </div>
+        <div class="impact">
+          <div class="num green">-70%</div>
+          <div class="lbl">Tiempo de captura de solicitud</div>
+          <div class="det">OCR Promotor · Mes 4</div>
+        </div>
+        <div class="impact">
+          <div class="num">+15–25%</div>
+          <div class="lbl">Recuperación en cobranza temprana</div>
+          <div class="det">Voicebot · Mes 3</div>
+        </div>
+        <div class="impact">
+          <div class="num green">24/7</div>
+          <div class="lbl">Atención sin sumar headcount</div>
+          <div class="det">Desde día 1 post-wedge</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section>
+    <div class="container">
+      <div class="final">
+        <h3>Cuando ustedes estén listos, <span class="cyan">nosotros también.</span></h3>
+        <p>Este diagnóstico se hizo sin acceso interno — solo con inteligencia pública. Con una reunión en sus oficinas, el alcance se afina y el wedge se vuelve compromiso.</p>
+        <a href="mailto:hola@hailo.mx?subject=Diagnóstico%20Attendo%20·%20Reunión" class="btn primary">Agendar diagnóstico presencial <span class="arrow">→</span></a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <div>
+      <span class="brand"><span class="hailo">HAILO</span> <span class="cross">· Agencia de IA</span></span>
+    </div>
+    <div class="mono">attendo.hailo.mx · Generado 2026-05-22 · Inteligencia 100% pública</div>
+  </div>
+</footer>
+
+</body>
+</html>
