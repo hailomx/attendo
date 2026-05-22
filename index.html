@@ -12,31 +12,23 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
   :root{
-    /* Surfaces */
     --bg:            #ffffff;
     --bg-soft:       #f8faf9;
-    --bg-tint:       #f3faf6;        /* leve tinte verde para alternar */
+    --bg-tint:       #f3faf6;
     --surface:       #ffffff;
     --surface-hover: #f6f8f7;
-
-    /* Borders */
     --border:        #e6ebe9;
     --border-strong: #d3dad7;
     --border-accent: rgba(31,209,138,0.35);
-
-    /* Text */
     --text:    #0d1418;
     --text-2:  #475569;
     --muted:   #94a3b8;
-
-    /* Brand — Attendo green */
     --attendo:       #1fd18a;
+    --attendo-light: #5feab2;
     --attendo-dark:  #0fa86c;
     --attendo-deep:  #086b46;
     --attendo-soft:  rgba(31,209,138,0.08);
-    --attendo-ring:  rgba(31,209,138,0.18);
-
-    /* HAILO mark on light */
+    --attendo-ring:  rgba(31,209,138,0.22);
     --hailo: #0d1418;
   }
   *{ box-sizing:border-box; }
@@ -47,33 +39,133 @@
       radial-gradient(ellipse at 15% -10%, rgba(31,209,138,0.10), transparent 55%),
       radial-gradient(ellipse at 90% 5%, rgba(31,209,138,0.06), transparent 50%),
       linear-gradient(180deg, #ffffff 0%, #f8faf9 100%);
+    background-color: var(--bg);
     color: var(--text);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     font-feature-settings: 'ss01','cv11';
     -webkit-font-smoothing: antialiased;
     line-height: 1.55;
     min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
   }
   .mono{ font-family:'JetBrains Mono', ui-monospace, monospace; }
   .container{ max-width: 1180px; margin: 0 auto; padding: 0 28px; }
 
-  /* TOP BAR */
+  /* ────────────────────────────────────
+     BACKGROUND FX — floating blobs
+     ──────────────────────────────────── */
+  .bg-fx{
+    position: fixed; inset:0;
+    pointer-events: none; z-index: 0;
+    overflow: hidden;
+  }
+  .blob{
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    will-change: transform;
+  }
+  .blob.a{ width: 520px; height: 520px; background: #1fd18a; top:-160px; left:-160px; opacity:.16; animation: drift1 30s ease-in-out infinite; }
+  .blob.b{ width: 420px; height: 420px; background: #0fa86c; top: 35%; right:-120px; opacity:.10; animation: drift2 36s ease-in-out infinite; }
+  .blob.c{ width: 640px; height: 640px; background: #1fd18a; bottom:-220px; left: 28%; opacity:.08; animation: drift3 44s ease-in-out infinite; }
+  @keyframes drift1 { 0%,100%{ transform: translate(0,0) scale(1); } 50%{ transform: translate(80px, 60px) scale(1.05); } }
+  @keyframes drift2 { 0%,100%{ transform: translate(0,0) scale(1); } 50%{ transform: translate(-60px,-40px) scale(.95); } }
+  @keyframes drift3 { 0%,100%{ transform: translate(0,0) scale(1); } 50%{ transform: translate(40px,-70px) scale(1.08); } }
+
+  /* Ensure content above blobs */
+  header, main, footer { position: relative; z-index: 1; }
+
+  /* ────────────────────────────────────
+     SCROLL PROGRESS BAR (top)
+     ──────────────────────────────────── */
+  .scroll-prog{
+    position: fixed; top:0; left:0; height: 2px;
+    width: 0%;
+    background: linear-gradient(90deg, var(--attendo), var(--attendo-dark));
+    z-index: 100;
+    transition: width .12s linear;
+    box-shadow: 0 0 12px var(--attendo);
+  }
+
+  /* ────────────────────────────────────
+     SECTION NAV DOTS (left side)
+     ──────────────────────────────────── */
+  .section-nav{
+    position: fixed;
+    left: 24px; top: 50%;
+    transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 14px;
+    z-index: 40;
+  }
+  .section-dot{
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: rgba(13,20,24,0.15);
+    cursor: pointer;
+    border: none; padding: 0;
+    transition: all .3s cubic-bezier(.25,.8,.25,1);
+    position: relative;
+  }
+  .section-dot::after{
+    content: attr(data-label);
+    position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--text-2); white-space: nowrap;
+    opacity: 0; pointer-events: none;
+    transition: opacity .25s ease;
+  }
+  .section-dot:hover::after{ opacity: 1; }
+  .section-dot.active{
+    background: var(--attendo);
+    transform: scale(1.4);
+    box-shadow: 0 0 0 4px var(--attendo-ring);
+  }
+  .section-dot:hover{ background: var(--attendo-dark); }
+  @media (max-width: 1100px){ .section-nav{ display: none; } }
+
+  /* ────────────────────────────────────
+     TOP BAR
+     ──────────────────────────────────── */
   header.bar{
     position: sticky; top:0; z-index:50;
     background: rgba(255,255,255,0.78);
     backdrop-filter: saturate(160%) blur(14px);
     -webkit-backdrop-filter: saturate(160%) blur(14px);
     border-bottom: 1px solid var(--border);
+    transition: box-shadow .3s ease;
+  }
+  header.bar.scrolled{
+    box-shadow: 0 4px 24px -14px rgba(13,20,24,0.08);
   }
   .bar-inner{ display:flex; align-items:center; justify-content:space-between; padding: 14px 28px; max-width:1380px; margin:0 auto; }
   .brand{ display:flex; align-items:center; gap:14px; font-weight:700; letter-spacing:.04em; }
   .brand .hailo{ color: var(--hailo); font-weight:800; letter-spacing:.18em; font-size: 15px; }
   .brand .cross{ color: var(--muted); font-weight:400; font-size: 16px; }
-  .brand img{ height: 22px; opacity: 1; }
-  .bar-meta{ color: var(--text-2); font-size: 13px; letter-spacing:.04em; }
-  .bar-meta .dot{ display:inline-block; width:6px; height:6px; border-radius:50%; background: var(--attendo); margin-right:8px; box-shadow: 0 0 12px var(--attendo); }
+  .brand img{ height: 22px; opacity: 1; transition: transform .3s ease; }
+  .brand:hover img{ transform: scale(1.08); }
+  .bar-meta{ color: var(--text-2); font-size: 13px; letter-spacing:.04em; display:flex; align-items:center; gap:8px; }
+  .bar-meta .dot{
+    display:inline-block; width:8px; height:8px; border-radius:50%;
+    background: var(--attendo);
+    position: relative;
+  }
+  .bar-meta .dot::before{
+    content:''; position:absolute; inset:-4px;
+    border-radius:50%;
+    background: var(--attendo);
+    opacity:.4;
+    animation: ping 2s ease-out infinite;
+  }
+  @keyframes ping{
+    0% { transform: scale(.6); opacity:.5; }
+    80%,100% { transform: scale(2.2); opacity:0; }
+  }
 
-  /* HERO */
+  /* ────────────────────────────────────
+     HERO
+     ──────────────────────────────────── */
   .hero{ padding: 110px 0 80px; position:relative; overflow:hidden; }
   .hero .grid-overlay{
     position:absolute; inset:0; pointer-events:none; opacity:.55;
@@ -83,6 +175,7 @@
     background-size: 48px 48px;
     mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
     -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+    transition: transform .3s ease;
   }
   .eyebrow{
     display:inline-flex; align-items:center; gap:10px;
@@ -94,7 +187,16 @@
     background: var(--attendo-soft);
     font-weight: 600;
   }
-  .eyebrow .pulse{ width:6px; height:6px; border-radius:50%; background: var(--attendo); box-shadow: 0 0 14px var(--attendo); }
+  .eyebrow .pulse{
+    width:6px; height:6px; border-radius:50%;
+    background: var(--attendo);
+    box-shadow: 0 0 14px var(--attendo);
+    animation: breathe 2.4s ease-in-out infinite;
+  }
+  @keyframes breathe{
+    0%,100%{ transform: scale(1); opacity:1; }
+    50%{ transform: scale(1.35); opacity:.6; }
+  }
   h1.hero-title{
     font-size: clamp(48px, 8vw, 96px);
     line-height: 0.96;
@@ -102,8 +204,22 @@
     font-weight: 800;
     margin: 28px 0 22px;
     color: var(--text);
+    transition: transform .15s ease;
+    will-change: transform;
   }
-  h1.hero-title .accent{ color: var(--attendo); }
+  h1.hero-title .accent{
+    background: linear-gradient(90deg, var(--attendo) 0%, var(--attendo-light) 50%, var(--attendo) 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 5s linear infinite;
+    display: inline-block;
+  }
+  @keyframes shimmer{
+    0%{ background-position: 0% center; }
+    100%{ background-position: -200% center; }
+  }
   .lede{ font-size: clamp(18px, 1.5vw, 22px); color: var(--text-2); max-width: 760px; line-height:1.55; }
   .lede strong{ color: var(--text); font-weight:600; }
   .lede em{ color: var(--attendo-dark); font-style:normal; font-weight:600; }
@@ -121,16 +237,21 @@
     padding: 22px 18px;
     border-right: 1px solid var(--border);
     background: var(--surface);
-    transition: background .2s ease;
+    transition: background .25s ease, transform .25s ease;
+    cursor: default;
   }
-  .stat-strip > div:hover{ background: var(--attendo-soft); }
+  .stat-strip > div:hover{
+    background: var(--attendo-soft);
+    transform: translateY(-2px);
+  }
   .stat-strip > div:last-child{ border-right: none; }
   .stat-strip .v{
     font-family:'JetBrains Mono', monospace;
-    font-size: 24px; font-weight:600;
+    font-size: 26px; font-weight:600;
     color: var(--text); letter-spacing:-0.01em;
   }
   .stat-strip .v.green{ color: var(--attendo); }
+  .stat-strip .v .sfx{ color: var(--attendo-dark); }
   .stat-strip .l{
     font-size: 11px; color: var(--muted);
     letter-spacing:.12em; text-transform: uppercase; margin-top:6px; font-weight:500;
@@ -141,13 +262,78 @@
     .stat-strip > div:nth-child(2n){ border-right: none; }
   }
 
-  /* SECTIONS */
+  .scroll-hint{
+    margin-top: 56px; display:flex; align-items:center; gap:12px;
+    color: var(--muted); font-family:'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+  }
+  .scroll-hint .line{
+    width: 40px; height: 1px; background: linear-gradient(90deg, var(--attendo), transparent);
+  }
+  .scroll-hint .arrow{
+    width:16px; height:16px; border-right: 2px solid var(--attendo-dark); border-bottom: 2px solid var(--attendo-dark);
+    transform: rotate(45deg);
+    animation: bounce 1.8s ease-in-out infinite;
+  }
+  @keyframes bounce{
+    0%,100%{ transform: rotate(45deg) translate(0,0); opacity:.7; }
+    50%{ transform: rotate(45deg) translate(4px,4px); opacity:1; }
+  }
+
+  /* ────────────────────────────────────
+     MARQUEE TICKER
+     ──────────────────────────────────── */
+  .marquee{
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 0;
+    background: linear-gradient(90deg, var(--bg-tint), var(--bg-soft), var(--bg-tint));
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+    z-index: 1;
+  }
+  .marquee::before, .marquee::after{
+    content:''; position: absolute; top:0; bottom:0; width: 120px; z-index: 2; pointer-events: none;
+  }
+  .marquee::before{ left:0; background: linear-gradient(90deg, var(--bg-tint), transparent); }
+  .marquee::after{ right:0; background: linear-gradient(-90deg, var(--bg-tint), transparent); }
+  .marquee-track{
+    display: inline-flex; gap: 36px; align-items: center;
+    animation: scroll-left 45s linear infinite;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    letter-spacing: .04em;
+    color: var(--text-2);
+    will-change: transform;
+  }
+  .marquee:hover .marquee-track{ animation-play-state: paused; }
+  .marquee-track .item{
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 14px; border:1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+  }
+  .marquee-track .item .v{ color: var(--attendo-dark); font-weight: 700; }
+  .marquee-track .sep{ color: var(--muted); }
+  @keyframes scroll-left{
+    from{ transform: translateX(0); }
+    to{ transform: translateX(-50%); }
+  }
+
+  /* ────────────────────────────────────
+     SECTIONS
+     ──────────────────────────────────── */
   section{ padding: 100px 0; border-top: 1px solid var(--border); position: relative; }
   section.tinted{ background: var(--bg-tint); }
   .sec-head{ display:flex; align-items: baseline; gap: 18px; margin-bottom: 12px; }
   .sec-num{
     font-family:'JetBrains Mono', monospace;
     color: var(--attendo-dark); font-size: 13px; letter-spacing:.16em; font-weight:600;
+    display: inline-flex; align-items: center; gap: 10px;
+  }
+  .sec-num::before{
+    content:''; width: 28px; height: 1px; background: var(--attendo); display: inline-block;
   }
   .sec-title{
     font-size: clamp(28px, 4vw, 42px);
@@ -157,7 +343,9 @@
   }
   .sec-sub{ color: var(--text-2); font-size: 17px; max-width: 760px; margin-top: 10px; }
 
-  /* CARDS */
+  /* ────────────────────────────────────
+     CARDS — with hover sweep
+     ──────────────────────────────────── */
   .grid{ display:grid; gap:18px; }
   .cards-3{ grid-template-columns: repeat(3, 1fr); }
   .cards-4{ grid-template-columns: repeat(4, 1fr); }
@@ -168,14 +356,26 @@
     border:1px solid var(--border);
     border-radius: 14px;
     padding: 22px;
-    transition: all .2s ease;
+    transition: all .3s cubic-bezier(.25,.8,.25,1);
     box-shadow: 0 1px 0 rgba(13,20,24,0.02);
+    position: relative;
+    overflow: hidden;
+  }
+  .card::after{
+    content:'';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, transparent 30%, rgba(31,209,138,0.10) 50%, transparent 70%);
+    transform: translateX(-110%);
+    transition: transform .9s cubic-bezier(.4,0,.2,1);
+    pointer-events: none;
   }
   .card:hover{
     border-color: var(--border-accent);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px -12px rgba(31,209,138,0.25);
+    transform: translateY(-4px);
+    box-shadow: 0 14px 40px -16px rgba(31,209,138,0.30);
   }
+  .card:hover::after{ transform: translateX(110%); }
+  .card > *{ position: relative; z-index: 1; }
   .card .kicker{
     font-family:'JetBrains Mono', monospace;
     font-size:11px; letter-spacing:.16em;
@@ -184,7 +384,9 @@
   .card h3{ margin: 10px 0 8px; font-size: 19px; letter-spacing:-0.01em; color: var(--text); }
   .card p{ color: var(--text-2); font-size: 15px; margin:0; }
 
-  /* OPS PIPELINE */
+  /* ────────────────────────────────────
+     OPS — with lane focus
+     ──────────────────────────────────── */
   .ops{
     display:grid; grid-template-columns: repeat(5, 1fr); gap: 12px;
     border:1px solid var(--border);
@@ -193,7 +395,11 @@
     box-shadow: 0 1px 0 rgba(13,20,24,0.02), 0 12px 40px -16px rgba(31,209,138,0.12);
   }
   @media (max-width: 880px){ .ops{ grid-template-columns: 1fr; } }
-  .lane{ padding: 6px; }
+  .lane{ padding: 6px; transition: opacity .35s ease, filter .35s ease; }
+  @media (hover:hover){
+    .ops:hover .lane{ opacity: .42; filter: saturate(.5); }
+    .ops:hover .lane:hover{ opacity: 1; filter: none; }
+  }
   .lane h4{
     margin:0 0 12px;
     font-family:'JetBrains Mono', monospace;
@@ -202,28 +408,42 @@
     text-transform: uppercase; font-weight:700;
     padding-bottom: 8px;
     border-bottom: 2px solid var(--attendo-soft);
+    transition: border-color .25s ease;
   }
+  .lane:hover h4{ border-color: var(--attendo); }
   .lane ul{ margin:0; padding:0; list-style: none; display:grid; gap:8px; }
   .lane li{
     background: var(--bg-soft);
     border:1px solid var(--border);
     border-radius: 8px; padding: 10px 12px;
     font-size: 13px; color: var(--text);
-    transition: all .15s ease;
+    transition: all .2s ease;
+    position: relative;
+    overflow: hidden;
   }
-  .lane li:hover{ border-color: var(--border-accent); background: var(--surface); }
+  .lane li::before{
+    content:''; position: absolute; left:0; top:0; bottom:0;
+    width: 3px; background: var(--attendo);
+    transform: scaleY(0); transform-origin: top;
+    transition: transform .3s ease;
+  }
+  .lane li:hover{ border-color: var(--border-accent); background: var(--surface); transform: translateX(4px); }
+  .lane li:hover::before{ transform: scaleY(1); }
   .lane li .who{
     display:block; font-size:11px; color: var(--muted);
     margin-top:4px;
     font-family:'JetBrains Mono', monospace; letter-spacing:.06em;
   }
 
-  /* FOOTER */
+  /* ────────────────────────────────────
+     FOOTER
+     ──────────────────────────────────── */
   footer{
     border-top:1px solid var(--border);
     padding: 32px 0;
     color: var(--text-2); font-size: 13px;
     background: var(--bg-soft);
+    position: relative; z-index: 1;
   }
   footer .container{ display:flex; justify-content:space-between; align-items:center; gap: 14px; flex-wrap: wrap; }
   footer .mono{ font-size: 12px; letter-spacing:.08em; color: var(--muted); }
@@ -232,18 +452,52 @@
   footer .brand-foot .sep{ color: var(--muted); }
   footer .brand-foot .tag{ color: var(--text-2); }
 
-  /* Subtle reveal */
-  @keyframes rise { from{ opacity:0; transform: translateY(12px); } to{ opacity:1; transform: none; } }
-  .rise{ animation: rise .6s ease both; }
-  .rise.d1{ animation-delay: .08s; }
-  .rise.d2{ animation-delay: .16s; }
-  .rise.d3{ animation-delay: .24s; }
+  /* ────────────────────────────────────
+     REVEAL (IntersectionObserver targets)
+     ──────────────────────────────────── */
+  .reveal{
+    opacity: 0; transform: translateY(24px);
+    transition: opacity .8s cubic-bezier(.25,.46,.45,.94), transform .8s cubic-bezier(.25,.46,.45,.94);
+  }
+  .reveal.visible{ opacity:1; transform: none; }
+  .reveal.d1{ transition-delay: .08s; }
+  .reveal.d2{ transition-delay: .16s; }
+  .reveal.d3{ transition-delay: .24s; }
+  .reveal.d4{ transition-delay: .32s; }
+  .reveal.d5{ transition-delay: .40s; }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce){
+    .blob, .scroll-hint .arrow, .bar-meta .dot::before,
+    .eyebrow .pulse, .hero-title .accent, .marquee-track{
+      animation: none !important;
+    }
+    .reveal{ opacity:1 !important; transform: none !important; }
+    *{ scroll-behavior: auto !important; }
+  }
 
 </style>
 </head>
 <body>
 
-<header class="bar">
+<!-- Scroll progress bar -->
+<div class="scroll-prog" id="scrollProg"></div>
+
+<!-- Floating gradient blobs -->
+<div class="bg-fx" aria-hidden="true">
+  <div class="blob a"></div>
+  <div class="blob b"></div>
+  <div class="blob c"></div>
+</div>
+
+<!-- Section nav dots -->
+<nav class="section-nav" aria-label="Navegación de secciones">
+  <button class="section-dot active" data-anchor="hero" data-label="Inicio" aria-label="Inicio"></button>
+  <button class="section-dot" data-anchor="01" data-label="Quiénes son" aria-label="Quiénes son"></button>
+  <button class="section-dot" data-anchor="02" data-label="Cómo operan" aria-label="Cómo operan"></button>
+</nav>
+
+<header class="bar" id="topbar">
   <div class="bar-inner">
     <div class="brand">
       <span class="hailo">HAILO</span>
@@ -257,50 +511,103 @@
 <main>
 
   <!-- HERO -->
-  <section class="hero" style="border-top:none;">
-    <div class="grid-overlay"></div>
+  <section class="hero" data-anchor="hero" style="border-top:none;">
+    <div class="grid-overlay" id="gridOverlay"></div>
     <div class="container">
-      <div class="eyebrow rise"><span class="pulse"></span> HAILO INTELLIGENCE DESK</div>
-      <h1 class="hero-title rise d1">
+      <div class="eyebrow reveal"><span class="pulse"></span> HAILO INTELLIGENCE DESK</div>
+      <h1 class="hero-title reveal d1" id="heroTitle">
         Conocemos<br/>
         <span class="accent">Attendo.</span>
       </h1>
-      <p class="lede rise d2">
+      <p class="lede reveal d2">
         Una <strong>SOFOM ENR mexicana</strong> con <em>18 años</em> en el mercado, especializada en <strong>crédito personal con descuento vía nómina</strong> para trabajadores del sector público y privado. Capital 100% mexicano, fundada en Monterrey en 2007.
       </p>
 
-      <div class="stat-strip rise d3">
-        <div><div class="v">60,255</div><div class="l">Clientes</div></div>
-        <div><div class="v">117,330</div><div class="l">Créditos otorgados</div></div>
-        <div><div class="v">1,155</div><div class="l">Asesores</div></div>
-        <div><div class="v">22</div><div class="l">Sucursales</div></div>
-        <div><div class="v">27</div><div class="l">Estados</div></div>
-        <div><div class="v green">18</div><div class="l">Años operando</div></div>
+      <div class="stat-strip reveal d3" id="statStrip">
+        <div><div class="v"><span data-count="60255">0</span></div><div class="l">Clientes</div></div>
+        <div><div class="v"><span data-count="117330">0</span></div><div class="l">Créditos otorgados</div></div>
+        <div><div class="v"><span data-count="1155">0</span></div><div class="l">Asesores</div></div>
+        <div><div class="v"><span data-count="22">0</span></div><div class="l">Sucursales</div></div>
+        <div><div class="v"><span data-count="27">0</span></div><div class="l">Estados</div></div>
+        <div><div class="v green"><span data-count="18">0</span></div><div class="l">Años operando</div></div>
+      </div>
+
+      <div class="scroll-hint reveal d4">
+        <span class="line"></span>
+        <span>Scroll para conocerlos</span>
+        <span class="arrow"></span>
       </div>
     </div>
   </section>
 
+  <!-- MARQUEE TICKER -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      <span class="item"><span class="v">60,255</span> clientes</span>
+      <span class="sep">●</span>
+      <span class="item"><span class="v">117,330</span> créditos otorgados</span>
+      <span class="sep">●</span>
+      <span class="item"><span class="v">1,155</span> asesores financieros</span>
+      <span class="sep">●</span>
+      <span class="item"><span class="v">22</span> sucursales</span>
+      <span class="sep">●</span>
+      <span class="item"><span class="v">27</span> estados</span>
+      <span class="sep">●</span>
+      <span class="item">Capital <span class="v">100% mexicano</span></span>
+      <span class="sep">●</span>
+      <span class="item">Audit <span class="v">Deloitte</span></span>
+      <span class="sep">●</span>
+      <span class="item">Miembro <span class="v">AMDEN</span></span>
+      <span class="sep">●</span>
+      <span class="item">Sede <span class="v">Monterrey, NL</span></span>
+      <span class="sep">●</span>
+      <span class="item">Sub-marca <span class="v">Vive Préstamo</span></span>
+      <span class="sep">●</span>
+      <!-- duplicate set for seamless loop -->
+      <span class="item"><span class="v">60,255</span> clientes</span>
+      <span class="sep">●</span>
+      <span class="item"><span class="v">117,330</span> créditos otorgados</span>
+      <span class="sep">●</span>
+      <span class="item"><span class="v">1,155</span> asesores financieros</span>
+      <span class="sep">●</span>
+      <span class="item"><span class="v">22</span> sucursales</span>
+      <span class="sep">●</span>
+      <span class="item"><span class="v">27</span> estados</span>
+      <span class="sep">●</span>
+      <span class="item">Capital <span class="v">100% mexicano</span></span>
+      <span class="sep">●</span>
+      <span class="item">Audit <span class="v">Deloitte</span></span>
+      <span class="sep">●</span>
+      <span class="item">Miembro <span class="v">AMDEN</span></span>
+      <span class="sep">●</span>
+      <span class="item">Sede <span class="v">Monterrey, NL</span></span>
+      <span class="sep">●</span>
+      <span class="item">Sub-marca <span class="v">Vive Préstamo</span></span>
+      <span class="sep">●</span>
+    </div>
+  </div>
+
   <!-- 01 QUIÉNES SON -->
-  <section>
+  <section data-anchor="01" id="sec01">
     <div class="container">
-      <div class="sec-head">
+      <div class="sec-head reveal">
         <span class="sec-num">01 · QUIÉNES SON</span>
       </div>
-      <h2 class="sec-title">Una SOFOM consolidada del norte.</h2>
-      <p class="sec-sub">Capital 100% mexicano, sede en San Pedro Garza García. Auditados por Deloitte, certificación ISO declarada, miembros de AMDEN.</p>
+      <h2 class="sec-title reveal d1">Una SOFOM consolidada del norte.</h2>
+      <p class="sec-sub reveal d2">Capital 100% mexicano, sede en San Pedro Garza García. Auditados por Deloitte, certificación ISO declarada, miembros de AMDEN.</p>
 
       <div class="grid cards-3" style="margin-top:36px;">
-        <div class="card">
+        <div class="card reveal d1">
           <div class="kicker">Identidad</div>
           <h3>SOFOM ENR · 2007</h3>
           <p>Sociedad Financiera de Objeto Múltiple, Entidad No Regulada. Capital 100% mexicano. HQ en Torre Okto, San Pedro Garza García, NL. Auditados por Deloitte, certificación ISO declarada, miembros AMDEN.</p>
         </div>
-        <div class="card">
+        <div class="card reveal d2">
           <div class="kicker">Modelo de negocio</div>
           <h3>Crédito vía descuento por nómina</h3>
           <p>Foco en trabajadores del sector público (jubilados, pensionados, gobierno) y privado. Especialidad declarada: refinanciamiento de deuda. El cliente típico consolida deudas más caras en un crédito Attendo.</p>
         </div>
-        <div class="card">
+        <div class="card reveal d3">
           <div class="kicker">Productos</div>
           <h3>Tres líneas activas</h3>
           <p>Crédito Simple sin Aval ($5k–$250k MXN, 6–60 meses, 47.93% tasa fija), Crédito Electrónico CREE, Crédito Simple Digital. Sub-marca operativa <span class="mono" style="color:var(--attendo-dark); font-weight:600;">Vive&nbsp;Préstamo</span>.</p>
@@ -308,22 +615,22 @@
       </div>
 
       <div class="grid cards-4" style="margin-top:18px;">
-        <div class="card">
+        <div class="card reveal d1">
           <div class="kicker">CEO · Co-founder</div>
           <h3>Andrés Cueva</h3>
           <p>Desde 2010. Basado en San Nicolás de los Garza, NL.</p>
         </div>
-        <div class="card">
+        <div class="card reveal d2">
           <div class="kicker">CFO</div>
           <h3>Alejandro Vidrio</h3>
           <p>Monterrey. Reportes financieros, tesorería, auditoría con Deloitte.</p>
         </div>
-        <div class="card">
+        <div class="card reveal d3">
           <div class="kicker">Director Operaciones y Riesgo</div>
           <h3>Jesús Treviño</h3>
           <p>San Pedro Garza García. Política de crédito, operación de cartera, riesgo.</p>
         </div>
-        <div class="card">
+        <div class="card reveal d4">
           <div class="kicker">DG · Vive Préstamo</div>
           <h3>Jaime Flores</h3>
           <p>Lidera la sub-marca / canal complementario de originación nómina.</p>
@@ -333,15 +640,15 @@
   </section>
 
   <!-- 02 OPERACIONES -->
-  <section class="tinted">
+  <section class="tinted" data-anchor="02" id="sec02">
     <div class="container">
-      <div class="sec-head">
+      <div class="sec-head reveal">
         <span class="sec-num">02 · CÓMO OPERAN</span>
       </div>
-      <h2 class="sec-title">Lo que hacen cada día.</h2>
-      <p class="sec-sub">Reconstruido desde vacantes reales (LinkedIn, Indeed, Glassdoor), FAQ pública, reseñas de empleados, productos publicados y apps móviles. Solo actividades comprobadas.</p>
+      <h2 class="sec-title reveal d1">Lo que hacen cada día.</h2>
+      <p class="sec-sub reveal d2">Reconstruido desde vacantes reales (LinkedIn, Indeed, Glassdoor), FAQ pública, reseñas de empleados, productos publicados y apps móviles. Solo actividades comprobadas.</p>
 
-      <div class="ops" style="margin-top:36px;">
+      <div class="ops reveal d3" style="margin-top:36px;">
 
         <div class="lane">
           <h4>Originación</h4>
@@ -409,6 +716,110 @@
     <div class="mono">attendo.hailo.mx · Actualizado 2026-05-22 · Inteligencia pública verificada</div>
   </div>
 </footer>
+
+<script>
+(function(){
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ─── Scroll progress bar ─── */
+  const prog = document.getElementById('scrollProg');
+  const topbar = document.getElementById('topbar');
+  function onScroll(){
+    const h = document.documentElement;
+    const scrolled = h.scrollTop || document.body.scrollTop;
+    const max = (h.scrollHeight - h.clientHeight) || 1;
+    const pct = Math.min(100, (scrolled / max) * 100);
+    prog.style.width = pct + '%';
+    if (scrolled > 4) topbar.classList.add('scrolled');
+    else topbar.classList.remove('scrolled');
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  /* ─── Reveal on intersect ─── */
+  const revealIo = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting){
+        e.target.classList.add('visible');
+        revealIo.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => revealIo.observe(el));
+
+  /* ─── Animated counters ─── */
+  function animateCount(el, target, duration){
+    const start = performance.now();
+    function step(now){
+      const t = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - t, 3);
+      const v = Math.round(target * eased);
+      el.textContent = v.toLocaleString('en-US');
+      if (t < 1) requestAnimationFrame(step);
+      else el.textContent = target.toLocaleString('en-US');
+    }
+    requestAnimationFrame(step);
+  }
+  const statIo = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting){
+        e.target.querySelectorAll('[data-count]').forEach((n, i) => {
+          const tgt = parseInt(n.dataset.count, 10);
+          const dur = prefersReduced ? 0 : 1400 + i * 80;
+          if (prefersReduced){ n.textContent = tgt.toLocaleString('en-US'); }
+          else { animateCount(n, tgt, dur); }
+        });
+        statIo.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.4 });
+  document.querySelectorAll('.stat-strip').forEach(el => statIo.observe(el));
+
+  /* ─── Hero mouse parallax ─── */
+  if (!prefersReduced){
+    const hero = document.querySelector('.hero');
+    const title = document.getElementById('heroTitle');
+    const grid = document.getElementById('gridOverlay');
+    let raf = null, mx = 0, my = 0;
+    hero.addEventListener('mousemove', (e) => {
+      const r = hero.getBoundingClientRect();
+      mx = (e.clientX - r.left) / r.width - 0.5;
+      my = (e.clientY - r.top) / r.height - 0.5;
+      if (!raf){
+        raf = requestAnimationFrame(() => {
+          title.style.transform = `translate(${mx * 8}px, ${my * 6}px)`;
+          grid.style.transform = `translate(${mx * -16}px, ${my * -12}px)`;
+          raf = null;
+        });
+      }
+    });
+    hero.addEventListener('mouseleave', () => {
+      title.style.transform = '';
+      grid.style.transform = '';
+    });
+  }
+
+  /* ─── Section dot nav ─── */
+  const dots = document.querySelectorAll('.section-dot');
+  const navIo = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting){
+        const key = e.target.dataset.anchor;
+        dots.forEach(d => d.classList.toggle('active', d.dataset.anchor === key));
+      }
+    });
+  }, { threshold: 0.4 });
+  document.querySelectorAll('section[data-anchor]').forEach(s => navIo.observe(s));
+
+  dots.forEach(d => {
+    d.addEventListener('click', () => {
+      const key = d.dataset.anchor;
+      const target = document.querySelector(`section[data-anchor="${key}"]`);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+})();
+</script>
 
 </body>
 </html>
