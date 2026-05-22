@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="description" content="HAILO × Attendo · Comunicación entre equipos." />
+<meta name="description" content="HAILO × Attendo · Comunicación entre agentes inteligentes." />
 <meta name="theme-color" content="#1fd18a" />
 <title>HAILO × Attendo · Comunicación</title>
 <link rel="icon" type="image/png" href="assets/favicon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
   :root{
     --attendo:       #1fd18a;
@@ -37,6 +37,7 @@
   }
   body{ position: relative; background: #050810; }
 
+  /* HALVES */
   .halves{ position: absolute; inset: 0; display: flex; z-index: 0; }
   .half{ flex: 1; position: relative; overflow: hidden; }
   .half-att{
@@ -73,9 +74,28 @@
     z-index: 2; transform: translateX(-50%);
   }
 
+  /* Animations — shared keyframes */
+  @keyframes fadeDropY{
+    from{ opacity: 0; transform: translateY(-8px); }
+    to{ opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeDropXY{
+    from{ opacity: 0; transform: translate(-50%, -8px); }
+    to{ opacity: 1; transform: translate(-50%, 0); }
+  }
+  @keyframes fadeUp{
+    from{ opacity: 0; transform: translateY(10px); }
+    to{ opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeUpXY{
+    from{ opacity: 0; transform: translate(-50%, 10px); }
+    to{ opacity: 1; transform: translate(-50%, 0); }
+  }
+
+  /* LIVE CHIP (top center) */
   .live-chip{
     position: absolute;
-    top: 22px; left: 50%; transform: translate(-50%, -8px);
+    top: 26px; left: 50%; transform: translate(-50%, -8px);
     z-index: 30;
     display: inline-flex; align-items: center; gap: 8px;
     padding: 6px 14px;
@@ -90,9 +110,8 @@
     text-transform: uppercase; font-weight: 700;
     box-shadow: 0 6px 24px -8px rgba(31,209,138,0.30);
     opacity: 0;
-    animation: dropIn .6s cubic-bezier(.25,.8,.25,1) .1s forwards;
+    animation: fadeDropXY .6s cubic-bezier(.25,.8,.25,1) .1s forwards;
   }
-  @keyframes dropIn{ to{ opacity: 1; transform: translate(-50%, 0); } }
   .live-chip .live-dot{
     width: 7px; height: 7px; border-radius: 50%;
     background: var(--attendo); position: relative;
@@ -107,39 +126,62 @@
     100%{ transform: scale(2.6); opacity: 0; }
   }
 
-  /* BRAND MARKS — centered in each half */
+  /* BRAND MARKS — CORNERS (elegant) */
   .brand-mark{
     position: absolute;
-    top: 72px;
-    display: flex; align-items: center; gap: 14px;
+    top: 32px;
+    display: flex; align-items: center; gap: 16px;
     z-index: 12;
     opacity: 0;
-    transform: translate(-50%, -8px);
-    animation: dropIn .6s cubic-bezier(.25,.8,.25,1) .25s forwards;
+    transform: translateY(-10px);
+    animation: fadeDropY .7s cubic-bezier(.25,.8,.25,1) .25s forwards;
+    padding: 8px 14px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.0);
+    transition: border-color .3s ease, background .3s ease;
   }
-  .brand-mark.attendo{ left: 25vw; }
-  .brand-mark.hailo{ left: 75vw; }
-  .brand-mark img{ height: 30px; display: block; }
+  .brand-mark.attendo{
+    left: 28px;
+    border-color: rgba(31,209,138,0.22);
+    background: rgba(255,255,255,0.72);
+    box-shadow: 0 10px 28px -14px rgba(31,209,138,0.35);
+  }
+  .brand-mark.hailo{
+    right: 28px;
+    background: rgba(10,18,40,0.72);
+    border-color: rgba(34,211,238,0.30);
+    box-shadow: 0 10px 28px -14px rgba(34,211,238,0.40);
+  }
+  .brand-mark.attendo:hover{ background: rgba(255,255,255,0.85); }
+  .brand-mark.hailo:hover{ background: rgba(10,18,40,0.85); }
+  .brand-mark img{
+    height: 36px; display: block;
+    transition: transform .3s ease;
+  }
+  .brand-mark.attendo:hover img{ transform: scale(1.04); }
   .brand-mark .logo-text{
-    font-weight: 800; letter-spacing: 0.22em;
-    font-size: 21px;
+    font-weight: 800; letter-spacing: 0.24em;
+    font-size: 24px;
     color: var(--hailo);
     text-shadow: 0 0 24px rgba(34,211,238,0.40);
   }
   .brand-mark .role-text{
     font-family: 'JetBrains Mono', monospace;
-    font-size: 10px; letter-spacing: 0.18em;
+    font-size: 9.5px; letter-spacing: 0.18em;
     text-transform: uppercase; font-weight: 600;
-    padding: 4px 10px; border-radius: 6px;
+    padding: 4px 9px; border-radius: 5px;
   }
   .brand-mark.attendo .role-text{
     color: var(--attendo-dark);
     background: rgba(31,209,138,0.10);
-    border: 1px solid rgba(31,209,138,0.25);
+    border: 1px solid rgba(31,209,138,0.22);
   }
   .brand-mark.hailo .role-text{
     color: var(--hailo-light);
-    background: rgba(34,211,238,0.08);
+    background: rgba(34,211,238,0.10);
     border: 1px solid rgba(34,211,238,0.25);
   }
 
@@ -163,7 +205,6 @@
   }
   .conn-line.intra-att{ stroke: var(--attendo); stroke-width: 1.1; }
   .conn-line.intra-hai{ stroke: var(--hailo); stroke-width: 1.1; }
-
   @keyframes drawLine{
     0%{ stroke-dashoffset: 3000; opacity: 0; }
     20%{ opacity: 0.8; }
@@ -177,7 +218,6 @@
     100%{ stroke-dashoffset: 0; opacity: 0.32; }
   }
 
-  /* Packets */
   .packet{
     opacity: 0;
     filter: url(#glow-strong);
@@ -190,7 +230,6 @@
 
   /* BUBBLES */
   .bubbles{ position: absolute; inset: 0; z-index: 15; pointer-events: none; }
-
   .bubble{
     position: absolute;
     transform: translate(-50%, -50%) scale(.35);
@@ -202,7 +241,6 @@
   @keyframes bubbleIn{
     to{ transform: translate(-50%, -50%) scale(1); opacity: 1; }
   }
-
   .avatar{
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
@@ -225,8 +263,6 @@
     0%, 100%{ transform: scale(1); opacity: 0.28; }
     50%{ transform: scale(1.18); opacity: 0; }
   }
-
-  /* Attendo bubbles (larger, fewer) */
   .bubble.att .avatar{
     width: 62px; height: 62px; font-size: 17px;
     background: #ffffff;
@@ -238,8 +274,6 @@
   }
   .bubble.att .avatar::after{ border-color: var(--attendo); }
   .bubble.att:hover .avatar{ box-shadow: 0 10px 32px -6px rgba(31,209,138,0.55); }
-
-  /* HAILO bubbles (smaller, many) */
   .bubble.hai .avatar{
     width: 46px; height: 46px; font-size: 13px;
     background: linear-gradient(135deg, #0a1228 0%, #0f1a35 100%);
@@ -251,72 +285,163 @@
   }
   .bubble.hai .avatar::after{ border-color: var(--hailo); }
   .bubble.hai:hover .avatar{ box-shadow: 0 8px 26px -4px rgba(34,211,238,0.65); }
-
-  .label{
-    margin-top: 8px;
-    text-align: center;
-    white-space: nowrap;
-  }
+  .label{ margin-top: 8px; text-align: center; white-space: nowrap; }
   .bubble.att .label{ margin-top: 10px; }
-  .label .name{
-    font-weight: 600;
-    letter-spacing: -0.005em;
-  }
+  .label .name{ font-weight: 600; letter-spacing: -0.005em; }
   .label .role{
     font-family: 'JetBrains Mono', monospace;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    margin-top: 3px;
-    opacity: 0.82;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    margin-top: 3px; opacity: 0.82;
   }
   .bubble.att .label .name{ font-size: 12px; color: var(--text-light); }
   .bubble.att .label .role{ font-size: 9.5px; color: var(--attendo-dark); }
   .bubble.hai .label .name{ font-size: 10.5px; color: var(--text-dark); }
   .bubble.hai .label .role{ font-size: 8.5px; color: var(--hailo); }
 
-  /* TAGLINE bottom */
+  /* TAGLINE — bottom center */
   .tagline{
     position: absolute;
-    bottom: 22px; left: 50%; transform: translateX(-50%);
+    bottom: 26px; left: 50%; transform: translate(-50%, 10px);
     z-index: 20;
-    display: flex; align-items: center; gap: 14px;
-    padding: 11px 22px;
-    background: rgba(255,255,255,0.92);
+    display: inline-flex; align-items: center; gap: 12px;
+    padding: 12px 22px;
+    background: rgba(255,255,255,0.94);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(31,209,138,0.22);
+    border: 1px solid rgba(31,209,138,0.25);
     border-radius: 999px;
     font-family: 'Inter', sans-serif;
-    font-size: 12.5px;
+    font-size: 13px;
     color: var(--text-light);
-    box-shadow: 0 8px 30px -12px rgba(0,0,0,0.20);
+    box-shadow: 0 10px 36px -14px rgba(0,0,0,0.22);
     opacity: 0;
-    animation: dropIn .6s cubic-bezier(.25,.8,.25,1) 2.8s forwards;
+    animation: fadeUpXY .65s cubic-bezier(.25,.8,.25,1) 2.8s forwards;
   }
-  .tagline .pair{
-    display: inline-flex; align-items: center; gap: 8px;
+  .tagline .agent-dot{
+    width: 8px; height: 8px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--attendo), var(--hailo));
+    position: relative;
+  }
+  .tagline .agent-dot::after{
+    content:''; position: absolute; inset: -4px;
+    border-radius: 50%;
+    background: var(--hailo);
+    opacity: .35;
+    animation: ping 2s ease-out infinite;
+  }
+  .tagline .msg{ font-weight: 500; }
+  .tagline .msg em{
+    color: var(--attendo-dark); font-style: normal; font-weight: 700;
+    background: linear-gradient(135deg, var(--attendo-dark), var(--hailo-deep));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* COUNTER — bottom-left elegant income widget */
+  .counter{
+    position: absolute;
+    bottom: 26px; left: 28px;
+    z-index: 21;
+    padding: 14px 20px 12px;
+    background: rgba(255,255,255,0.94);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(31,209,138,0.28);
+    border-radius: 14px;
+    box-shadow: 0 12px 36px -14px rgba(31,209,138,0.25);
+    min-width: 220px;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeUp .65s cubic-bezier(.25,.8,.25,1) 3.0s forwards;
+  }
+  .counter-head{
+    display: flex; align-items: center; gap: 8px;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 11px; letter-spacing: 0.16em;
-    text-transform: uppercase; font-weight: 700;
+    font-size: 9.5px; letter-spacing: 0.20em;
+    text-transform: uppercase;
+    color: var(--attendo-dark);
+    font-weight: 700;
+    margin-bottom: 6px;
   }
-  .tagline .pair .att{ color: var(--attendo-dark); }
-  .tagline .pair .arrow{ color: var(--muted-light); }
-  .tagline .pair .hai{ color: var(--hailo-deep); }
-  .tagline .sep{ width: 1px; height: 14px; background: rgba(13,20,24,0.15); }
-  .tagline .msg{ color: var(--text-light); font-weight: 500; }
-  .tagline .msg em{ color: var(--attendo-dark); font-style: normal; font-weight: 600; }
-  .tagline .count{
-    color: var(--hailo-deep); font-weight: 700;
-    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  .counter-head .up{
+    color: var(--attendo);
+    font-size: 11px;
+    animation: floatUp 1.8s ease-in-out infinite;
+  }
+  @keyframes floatUp{
+    0%,100%{ transform: translateY(0); }
+    50%{ transform: translateY(-2px); }
+  }
+  .counter-value{
+    display: flex; align-items: baseline; gap: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-light);
+    line-height: 1;
+  }
+  .counter-value .currency{
+    color: var(--attendo-dark);
+    font-weight: 600;
+    font-size: 18px;
+  }
+  .counter-value .amount{
+    font-weight: 700;
+    font-size: 28px;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-light);
+    transition: transform .18s cubic-bezier(.25,.8,.25,1), color .25s ease;
+  }
+  .counter-value .amount.bump{
+    transform: scale(1.06);
+    color: var(--attendo-dark);
+  }
+  .counter-value .unit{
+    color: var(--muted-light);
+    font-size: 11px;
+    font-weight: 500;
+    margin-left: 6px;
+    letter-spacing: 0.08em;
+  }
+  .counter-trail{
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted-light);
+    font-weight: 500;
+  }
+  .counter-trail .bar-mini{
+    width: 50px; height: 3px;
+    background: rgba(31,209,138,0.15);
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+  }
+  .counter-trail .bar-mini::after{
+    content:'';
+    position: absolute; top: 0; left: 0; bottom: 0; width: 35%;
+    background: linear-gradient(90deg, var(--attendo), var(--hailo));
+    border-radius: 2px;
+    animation: shimmer-bar 2s linear infinite;
+  }
+  @keyframes shimmer-bar{
+    from{ transform: translateX(-100%); }
+    to{ transform: translateX(285%); }
+  }
+  .counter-trail .live-mini{
+    color: var(--attendo-dark);
+    font-weight: 700;
   }
 
   /* MOBILE FALLBACK */
   @media (max-width: 1100px){
-    .bubbles, .connections, .divider, .brand-mark { display: none; }
+    .bubbles, .connections, .divider, .brand-mark, .counter { display: none; }
     .halves{ flex-direction: column; }
     .live-chip, .tagline{ font-size: 10px; padding: 7px 14px; }
-    .tagline{ max-width: 90vw; flex-direction: column; gap: 6px; text-align: center; }
-    .tagline .sep{ display:none; }
+    .tagline{ max-width: 90vw; text-align: center; }
     body::after{
       content: 'Para ver la visualización completa, abrir en pantalla ≥ 1100px';
       position: absolute; inset: 0;
@@ -333,9 +458,10 @@
     .bubble.hai .label .name{ font-size: 9.5px; }
     .bubble.att .label .role{ font-size: 9px; }
     .bubble.hai .label .role{ font-size: 8px; }
-    .brand-mark{ top: 62px; }
-    .brand-mark img{ height: 26px; }
-    .brand-mark .logo-text{ font-size: 18px; }
+    .brand-mark img{ height: 30px; }
+    .brand-mark .logo-text{ font-size: 20px; }
+    .counter{ padding: 11px 16px 9px; min-width: 195px; }
+    .counter-value .amount{ font-size: 24px; }
   }
 
   @media (prefers-reduced-motion: reduce){
@@ -345,7 +471,7 @@
     .conn-line.intra-att, .conn-line.intra-hai{ opacity: 0.28; }
     .packet{ opacity: 0.85; }
     .live-chip, .tagline{ opacity: 1; transform: translate(-50%, 0); }
-    .brand-mark{ opacity: 1; transform: translate(-50%, 0); }
+    .brand-mark, .counter{ opacity: 1; transform: translateY(0); }
   }
 </style>
 </head>
@@ -363,6 +489,7 @@
   Live · Comunicación activa
 </div>
 
+<!-- BRAND MARKS — corners -->
 <div class="brand-mark attendo">
   <img src="assets/attendo-logo.png" alt="Attendo" />
   <span class="role-text">Financiera</span>
@@ -391,29 +518,25 @@
     </filter>
   </defs>
 
-  <!-- ─── CROSS-TEAM LINES (16) ─── -->
-  <!-- AC(15,26) connections -->
+  <!-- CROSS-TEAM LINES (16) -->
   <path id="c1"  class="conn-line" style="animation-delay:1.20s" d="M 15 26 C 32 26, 44 22, 58 22"/>
   <path id="c2"  class="conn-line" style="animation-delay:1.27s" d="M 15 26 C 35 22, 55 20, 73 22"/>
   <path id="c3"  class="conn-line" style="animation-delay:1.34s" d="M 15 26 C 40 20, 65 18, 88 22"/>
-  <!-- AV(33,44) connections -->
   <path id="c4"  class="conn-line" style="animation-delay:1.41s" d="M 33 44 C 43 38, 50 28, 58 22"/>
   <path id="c5"  class="conn-line" style="animation-delay:1.48s" d="M 33 44 C 43 42, 50 38, 58 37"/>
   <path id="c6"  class="conn-line" style="animation-delay:1.55s" d="M 33 44 C 43 46, 50 50, 58 52"/>
   <path id="c7"  class="conn-line" style="animation-delay:1.62s" d="M 33 44 C 48 44, 62 35, 73 37"/>
-  <!-- JT(15,60) connections -->
   <path id="c8"  class="conn-line" style="animation-delay:1.69s" d="M 15 60 C 30 50, 45 42, 58 37"/>
   <path id="c9"  class="conn-line" style="animation-delay:1.76s" d="M 15 60 C 30 60, 45 65, 58 67"/>
   <path id="c10" class="conn-line" style="animation-delay:1.83s" d="M 15 60 C 35 60, 55 65, 73 67"/>
   <path id="c11" class="conn-line" style="animation-delay:1.90s" d="M 15 60 C 30 70, 45 78, 58 82"/>
-  <!-- JF(33,76) connections -->
   <path id="c12" class="conn-line" style="animation-delay:1.97s" d="M 33 76 C 40 64, 50 56, 58 52"/>
   <path id="c13" class="conn-line" style="animation-delay:2.04s" d="M 33 76 C 40 70, 50 67, 58 67"/>
   <path id="c14" class="conn-line" style="animation-delay:2.11s" d="M 33 76 C 40 78, 50 81, 58 82"/>
   <path id="c15" class="conn-line" style="animation-delay:2.18s" d="M 33 76 C 50 80, 65 82, 73 82"/>
   <path id="c16" class="conn-line" style="animation-delay:2.25s" d="M 33 76 C 55 80, 75 84, 88 82"/>
 
-  <!-- ─── INTRA-HAILO LINES (8) ─── -->
+  <!-- INTRA-HAILO LINES (8) -->
   <path id="h1" class="conn-line intra-hai" style="animation-delay:2.32s" d="M 58 22 C 63 20, 68 20, 73 22"/>
   <path id="h2" class="conn-line intra-hai" style="animation-delay:2.36s" d="M 73 22 C 78 20, 83 20, 88 22"/>
   <path id="h3" class="conn-line intra-hai" style="animation-delay:2.40s" d="M 58 37 C 65 33, 80 33, 88 37"/>
@@ -423,51 +546,35 @@
   <path id="h7" class="conn-line intra-hai" style="animation-delay:2.56s" d="M 58 22 C 56 27, 56 32, 58 37"/>
   <path id="h8" class="conn-line intra-hai" style="animation-delay:2.60s" d="M 58 52 C 56 57, 56 62, 58 67"/>
 
-  <!-- ─── INTRA-ATTENDO LINES (2) ─── -->
+  <!-- INTRA-ATTENDO LINES (2) -->
   <path id="a1" class="conn-line intra-att" style="animation-delay:2.64s" d="M 15 26 C 20 30, 28 38, 33 44"/>
   <path id="a2" class="conn-line intra-att" style="animation-delay:2.68s" d="M 15 60 C 20 65, 28 72, 33 76"/>
 
-  <!-- ─── PACKETS — bidirectional on cross lines ─── -->
-  <!-- c1 (AC↔GE) bidirectional -->
+  <!-- PACKETS bidirectional -->
   <circle class="packet green" r="0.7"><animateMotion dur="3.6s" repeatCount="indefinite" begin="3.0s"><mpath href="#c1"/></animateMotion></circle>
   <circle class="packet cyan"  r="0.7"><animateMotion dur="3.6s" repeatCount="indefinite" begin="4.8s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c1"/></animateMotion></circle>
-  <!-- c2 (AC↔SH) -->
   <circle class="packet cyan"  r="0.7"><animateMotion dur="3.4s" repeatCount="indefinite" begin="3.2s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c2"/></animateMotion></circle>
-  <!-- c3 (AC↔DR) bidirectional -->
   <circle class="packet green" r="0.7"><animateMotion dur="3.8s" repeatCount="indefinite" begin="3.4s"><mpath href="#c3"/></animateMotion></circle>
   <circle class="packet cyan"  r="0.7"><animateMotion dur="3.8s" repeatCount="indefinite" begin="5.3s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c3"/></animateMotion></circle>
-  <!-- c4 (AV↔GE) -->
   <circle class="packet green" r="0.7"><animateMotion dur="3.2s" repeatCount="indefinite" begin="3.6s"><mpath href="#c4"/></animateMotion></circle>
-  <!-- c5 (AV↔LM) bidirectional -->
   <circle class="packet green" r="0.7"><animateMotion dur="3.0s" repeatCount="indefinite" begin="3.8s"><mpath href="#c5"/></animateMotion></circle>
   <circle class="packet cyan"  r="0.7"><animateMotion dur="3.0s" repeatCount="indefinite" begin="5.3s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c5"/></animateMotion></circle>
-  <!-- c6 (AV↔PN) -->
   <circle class="packet cyan"  r="0.7"><animateMotion dur="3.2s" repeatCount="indefinite" begin="4.0s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c6"/></animateMotion></circle>
-  <!-- c7 (AV↔SC) -->
   <circle class="packet green" r="0.7"><animateMotion dur="3.6s" repeatCount="indefinite" begin="4.2s"><mpath href="#c7"/></animateMotion></circle>
-  <!-- c8 (JT↔LM) bidirectional -->
   <circle class="packet green" r="0.7"><animateMotion dur="3.8s" repeatCount="indefinite" begin="4.4s"><mpath href="#c8"/></animateMotion></circle>
   <circle class="packet cyan"  r="0.7"><animateMotion dur="3.8s" repeatCount="indefinite" begin="6.3s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c8"/></animateMotion></circle>
-  <!-- c9 (JT↔BL) -->
   <circle class="packet green" r="0.7"><animateMotion dur="3.4s" repeatCount="indefinite" begin="4.5s"><mpath href="#c9"/></animateMotion></circle>
-  <!-- c10 (JT↔RC) -->
   <circle class="packet cyan"  r="0.7"><animateMotion dur="3.8s" repeatCount="indefinite" begin="4.7s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c10"/></animateMotion></circle>
-  <!-- c11 (JT↔VC) bidirectional -->
   <circle class="packet green" r="0.7"><animateMotion dur="3.6s" repeatCount="indefinite" begin="4.9s"><mpath href="#c11"/></animateMotion></circle>
   <circle class="packet cyan"  r="0.7"><animateMotion dur="3.6s" repeatCount="indefinite" begin="6.7s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c11"/></animateMotion></circle>
-  <!-- c12 (JF↔PN) -->
   <circle class="packet green" r="0.7"><animateMotion dur="3.4s" repeatCount="indefinite" begin="5.0s"><mpath href="#c12"/></animateMotion></circle>
-  <!-- c13 (JF↔BL) -->
   <circle class="packet cyan"  r="0.7"><animateMotion dur="3.2s" repeatCount="indefinite" begin="5.2s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c13"/></animateMotion></circle>
-  <!-- c14 (JF↔VC) -->
   <circle class="packet green" r="0.7"><animateMotion dur="3.0s" repeatCount="indefinite" begin="5.4s"><mpath href="#c14"/></animateMotion></circle>
-  <!-- c15 (JF↔DO) -->
   <circle class="packet cyan"  r="0.7"><animateMotion dur="3.4s" repeatCount="indefinite" begin="5.6s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c15"/></animateMotion></circle>
-  <!-- c16 (JF↔AP) bidirectional -->
   <circle class="packet green" r="0.7"><animateMotion dur="3.8s" repeatCount="indefinite" begin="5.8s"><mpath href="#c16"/></animateMotion></circle>
   <circle class="packet cyan"  r="0.7"><animateMotion dur="3.8s" repeatCount="indefinite" begin="7.7s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#c16"/></animateMotion></circle>
 
-  <!-- Intra-HAILO packets (cyan, single dir) -->
+  <!-- Intra packets -->
   <circle class="packet cyan" r="0.5"><animateMotion dur="2.8s" repeatCount="indefinite" begin="5.0s"><mpath href="#h1"/></animateMotion></circle>
   <circle class="packet cyan" r="0.5"><animateMotion dur="2.8s" repeatCount="indefinite" begin="5.4s"><mpath href="#h2"/></animateMotion></circle>
   <circle class="packet cyan" r="0.5"><animateMotion dur="3.0s" repeatCount="indefinite" begin="5.6s"><mpath href="#h3"/></animateMotion></circle>
@@ -476,110 +583,86 @@
   <circle class="packet cyan" r="0.5"><animateMotion dur="2.6s" repeatCount="indefinite" begin="6.2s"><mpath href="#h6"/></animateMotion></circle>
   <circle class="packet cyan" r="0.5"><animateMotion dur="2.8s" repeatCount="indefinite" begin="5.2s"><mpath href="#h7"/></animateMotion></circle>
   <circle class="packet cyan" r="0.5"><animateMotion dur="2.8s" repeatCount="indefinite" begin="5.6s"><mpath href="#h8"/></animateMotion></circle>
-
-  <!-- Intra-Attendo packets (green) -->
   <circle class="packet green" r="0.5"><animateMotion dur="2.8s" repeatCount="indefinite" begin="5.5s"><mpath href="#a1"/></animateMotion></circle>
   <circle class="packet green" r="0.5"><animateMotion dur="2.8s" repeatCount="indefinite" begin="5.9s"><mpath href="#a2"/></animateMotion></circle>
 </svg>
 
 <!-- Team bubbles -->
 <div class="bubbles">
-  <!-- ─── ATTENDO (4) ─── -->
-  <div class="bubble att" style="left:15%; top:26%; animation-delay:0.40s;">
-    <div class="avatar"><span>AC</span></div>
-    <div class="label"><div class="name">Andrés Cueva</div><div class="role">CEO · Co-founder</div></div>
-  </div>
-  <div class="bubble att" style="left:33%; top:44%; animation-delay:0.50s;">
-    <div class="avatar"><span>AV</span></div>
-    <div class="label"><div class="name">Alejandro Vidrio</div><div class="role">CFO</div></div>
-  </div>
-  <div class="bubble att" style="left:15%; top:60%; animation-delay:0.60s;">
-    <div class="avatar"><span>JT</span></div>
-    <div class="label"><div class="name">Jesús Treviño</div><div class="role">Operaciones · Riesgo</div></div>
-  </div>
-  <div class="bubble att" style="left:33%; top:76%; animation-delay:0.70s;">
-    <div class="avatar"><span>JF</span></div>
-    <div class="label"><div class="name">Jaime Flores</div><div class="role">DG · Vive Préstamo</div></div>
-  </div>
+  <div class="bubble att" style="left:15%; top:26%; animation-delay:0.40s;"><div class="avatar"><span>AC</span></div><div class="label"><div class="name">Andrés Cueva</div><div class="role">CEO · Co-founder</div></div></div>
+  <div class="bubble att" style="left:33%; top:44%; animation-delay:0.50s;"><div class="avatar"><span>AV</span></div><div class="label"><div class="name">Alejandro Vidrio</div><div class="role">CFO</div></div></div>
+  <div class="bubble att" style="left:15%; top:60%; animation-delay:0.60s;"><div class="avatar"><span>JT</span></div><div class="label"><div class="name">Jesús Treviño</div><div class="role">Operaciones · Riesgo</div></div></div>
+  <div class="bubble att" style="left:33%; top:76%; animation-delay:0.70s;"><div class="avatar"><span>JF</span></div><div class="label"><div class="name">Jaime Flores</div><div class="role">DG · Vive Préstamo</div></div></div>
 
-  <!-- ─── HAILO (15) — grid 3 cols × 5 rows ─── -->
-  <!-- Row 1: y=22 -->
-  <div class="bubble hai" style="left:58%; top:22%; animation-delay:0.80s;">
-    <div class="avatar"><span>GE</span></div>
-    <div class="label"><div class="name">Gonzalo Estrada</div><div class="role">Founder</div></div>
+  <div class="bubble hai" style="left:58%; top:22%; animation-delay:0.80s;"><div class="avatar"><span>GE</span></div><div class="label"><div class="name">Gonzalo Estrada</div><div class="role">Founder</div></div></div>
+  <div class="bubble hai" style="left:73%; top:22%; animation-delay:0.86s;"><div class="avatar"><span>SH</span></div><div class="label"><div class="name">Erik “Shadow”</div><div class="role">Co-founder</div></div></div>
+  <div class="bubble hai" style="left:88%; top:22%; animation-delay:0.92s;"><div class="avatar"><span>DR</span></div><div class="label"><div class="name">Diana Ríos</div><div class="role">Estrategia IA</div></div></div>
+  <div class="bubble hai" style="left:58%; top:37%; animation-delay:0.98s;"><div class="avatar"><span>LM</span></div><div class="label"><div class="name">Lucas Mendoza</div><div class="role">Engineering Lead</div></div></div>
+  <div class="bubble hai" style="left:73%; top:37%; animation-delay:1.04s;"><div class="avatar"><span>SC</span></div><div class="label"><div class="name">Sofía Castro</div><div class="role">Producto</div></div></div>
+  <div class="bubble hai" style="left:88%; top:37%; animation-delay:1.10s;"><div class="avatar"><span>MV</span></div><div class="label"><div class="name">Mateo Vega</div><div class="role">Operaciones</div></div></div>
+  <div class="bubble hai" style="left:58%; top:52%; animation-delay:1.16s;"><div class="avatar"><span>PN</span></div><div class="label"><div class="name">Paola Núñez</div><div class="role">Data Science</div></div></div>
+  <div class="bubble hai" style="left:73%; top:52%; animation-delay:1.22s;"><div class="avatar"><span>IR</span></div><div class="label"><div class="name">Iván Rojas</div><div class="role">AI Research</div></div></div>
+  <div class="bubble hai" style="left:88%; top:52%; animation-delay:1.28s;"><div class="avatar"><span>CS</span></div><div class="label"><div class="name">Camila Soto</div><div class="role">UX Research</div></div></div>
+  <div class="bubble hai" style="left:58%; top:67%; animation-delay:1.34s;"><div class="avatar"><span>BL</span></div><div class="label"><div class="name">Bruno Lara</div><div class="role">Backend</div></div></div>
+  <div class="bubble hai" style="left:73%; top:67%; animation-delay:1.40s;"><div class="avatar"><span>RC</span></div><div class="label"><div class="name">Renata Cano</div><div class="role">Frontend</div></div></div>
+  <div class="bubble hai" style="left:88%; top:67%; animation-delay:1.46s;"><div class="avatar"><span>HS</span></div><div class="label"><div class="name">Hugo Salas</div><div class="role">DevOps</div></div></div>
+  <div class="bubble hai" style="left:58%; top:82%; animation-delay:1.52s;"><div class="avatar"><span>VC</span></div><div class="label"><div class="name">Valeria Cruz</div><div class="role">Project Mgmt</div></div></div>
+  <div class="bubble hai" style="left:73%; top:82%; animation-delay:1.58s;"><div class="avatar"><span>DO</span></div><div class="label"><div class="name">Diego Ortiz</div><div class="role">Sales</div></div></div>
+  <div class="bubble hai" style="left:88%; top:82%; animation-delay:1.64s;"><div class="avatar"><span>AP</span></div><div class="label"><div class="name">Andrea Peña</div><div class="role">Marketing</div></div></div>
+</div>
+
+<!-- COUNTER — bottom left -->
+<div class="counter" aria-live="polite">
+  <div class="counter-head">
+    <span class="up">↗</span>
+    <span>Ingresos generados</span>
   </div>
-  <div class="bubble hai" style="left:73%; top:22%; animation-delay:0.86s;">
-    <div class="avatar"><span>SH</span></div>
-    <div class="label"><div class="name">Erik “Shadow”</div><div class="role">Co-founder</div></div>
+  <div class="counter-value">
+    <span class="currency">$</span>
+    <span class="amount" id="counterAmount">0</span>
+    <span class="unit">MXN</span>
   </div>
-  <div class="bubble hai" style="left:88%; top:22%; animation-delay:0.92s;">
-    <div class="avatar"><span>DR</span></div>
-    <div class="label"><div class="name">Diana Ríos</div><div class="role">Estrategia IA</div></div>
-  </div>
-  <!-- Row 2: y=37 -->
-  <div class="bubble hai" style="left:58%; top:37%; animation-delay:0.98s;">
-    <div class="avatar"><span>LM</span></div>
-    <div class="label"><div class="name">Lucas Mendoza</div><div class="role">Engineering Lead</div></div>
-  </div>
-  <div class="bubble hai" style="left:73%; top:37%; animation-delay:1.04s;">
-    <div class="avatar"><span>SC</span></div>
-    <div class="label"><div class="name">Sofía Castro</div><div class="role">Producto</div></div>
-  </div>
-  <div class="bubble hai" style="left:88%; top:37%; animation-delay:1.10s;">
-    <div class="avatar"><span>MV</span></div>
-    <div class="label"><div class="name">Mateo Vega</div><div class="role">Operaciones</div></div>
-  </div>
-  <!-- Row 3: y=52 -->
-  <div class="bubble hai" style="left:58%; top:52%; animation-delay:1.16s;">
-    <div class="avatar"><span>PN</span></div>
-    <div class="label"><div class="name">Paola Núñez</div><div class="role">Data Science</div></div>
-  </div>
-  <div class="bubble hai" style="left:73%; top:52%; animation-delay:1.22s;">
-    <div class="avatar"><span>IR</span></div>
-    <div class="label"><div class="name">Iván Rojas</div><div class="role">AI Research</div></div>
-  </div>
-  <div class="bubble hai" style="left:88%; top:52%; animation-delay:1.28s;">
-    <div class="avatar"><span>CS</span></div>
-    <div class="label"><div class="name">Camila Soto</div><div class="role">UX Research</div></div>
-  </div>
-  <!-- Row 4: y=67 -->
-  <div class="bubble hai" style="left:58%; top:67%; animation-delay:1.34s;">
-    <div class="avatar"><span>BL</span></div>
-    <div class="label"><div class="name">Bruno Lara</div><div class="role">Backend</div></div>
-  </div>
-  <div class="bubble hai" style="left:73%; top:67%; animation-delay:1.40s;">
-    <div class="avatar"><span>RC</span></div>
-    <div class="label"><div class="name">Renata Cano</div><div class="role">Frontend</div></div>
-  </div>
-  <div class="bubble hai" style="left:88%; top:67%; animation-delay:1.46s;">
-    <div class="avatar"><span>HS</span></div>
-    <div class="label"><div class="name">Hugo Salas</div><div class="role">DevOps</div></div>
-  </div>
-  <!-- Row 5: y=82 -->
-  <div class="bubble hai" style="left:58%; top:82%; animation-delay:1.52s;">
-    <div class="avatar"><span>VC</span></div>
-    <div class="label"><div class="name">Valeria Cruz</div><div class="role">Project Mgmt</div></div>
-  </div>
-  <div class="bubble hai" style="left:73%; top:82%; animation-delay:1.58s;">
-    <div class="avatar"><span>DO</span></div>
-    <div class="label"><div class="name">Diego Ortiz</div><div class="role">Sales</div></div>
-  </div>
-  <div class="bubble hai" style="left:88%; top:82%; animation-delay:1.64s;">
-    <div class="avatar"><span>AP</span></div>
-    <div class="label"><div class="name">Andrea Peña</div><div class="role">Marketing</div></div>
+  <div class="counter-trail">
+    <span class="bar-mini"></span>
+    <span class="live-mini">Live</span>
   </div>
 </div>
 
-<!-- Bottom tagline -->
+<!-- TAGLINE — bottom center -->
 <div class="tagline">
-  <span class="pair">
-    <span class="att">ATTENDO</span>
-    <span class="arrow">↔</span>
-    <span class="hai">HAILO</span>
-  </span>
-  <span class="sep"></span>
-  <span class="msg">Equipo completo enfocado en su proyecto · <span class="count">26 canales activos</span></span>
+  <span class="agent-dot"></span>
+  <span class="msg">Comunicación directa entre <em>agentes inteligentes</em></span>
 </div>
+
+<script>
+(function(){
+  // Animated income counter — gradually accumulates "income"
+  const amountEl = document.getElementById('counterAmount');
+  if (!amountEl) return;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let total = 0;
+  function tick(){
+    // increment by random amount between ~800 and ~6000 MXN
+    const inc = Math.floor(Math.random() * 5200) + 800;
+    total += inc;
+    amountEl.textContent = total.toLocaleString('en-US');
+    amountEl.classList.add('bump');
+    setTimeout(() => amountEl.classList.remove('bump'), 180);
+
+    // schedule next tick with variable cadence
+    const nextDelay = Math.floor(Math.random() * 900) + 350;
+    setTimeout(tick, nextDelay);
+  }
+
+  if (reduced){
+    amountEl.textContent = '486,720';
+  } else {
+    // start after the entrance choreography finishes
+    setTimeout(tick, 3400);
+  }
+})();
+</script>
 
 </body>
 </html>
